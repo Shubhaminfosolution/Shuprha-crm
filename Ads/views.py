@@ -4,65 +4,64 @@ from .services.lead_ingestion_service import LeadIngestionService
 from Ads.models import AdForm
 from Ads.adapters.meta_adapter import MetaAdapter
 
+VERIFY_TOKEN = "crm_verift_token"
 
-
-@api_view(["POST"])
+@api_view(["GET","POST"])
 def meta_webhook(request):
+    if request.method == "GET":
 
-    entry = request.data.get("entry", [])
+        mode = request.GET.get("hub.mode")
+        token = request.GET.get("hub.verify_token")
+        challenge = request.GET.get("hub.challenge")
 
-    for item in entry:
+        if mode == "subscribe" and token == VERIFY_TOKEN:
+            return Response(challenge)
 
-        changes = item.get("changes", [])
+        return Response(status=403)
 
-        for change in changes:
+    if request.method == "POST":
+        entry = request.data.get("entry", [])
 
-            value = change.get("value", {})
+        for item in entry:
 
-            leadgen_id = value.get("leadgen_id")
-            form_id = value.get("form_id")
+            changes = item.get("changes", [])
 
-            if leadgen_id and form_id:
+            for change in changes:
 
-                form = AdForm.objects.filter(form_id=form_id).first()
+                value = change.get("value", {})
 
-                if not form:
-                    continue
+                leadgen_id = value.get("leadgen_id")
+                form_id = value.get("form_id")
 
-                access_token = form.account.access_token
+                if leadgen_id and form_id:
 
-                adapter = MetaAdapter(access_token)
+                    form = AdForm.objects.filter(form_id=form_id).first()
 
-                lead_data = adapter.get_lead(leadgen_id)
+                    if not form:
+                        continue
 
-                fields = lead_data.get("field_data", [])
+                    access_token = form.account.access_token
 
-                data = {}
+                    adapter = MetaAdapter(access_token)
 
-                for field in fields:
-                    data[field["name"]] = field["values"][0]
+                    lead_data = adapter.get_lead(leadgen_id)
 
-                LeadIngestionService.create_lead_from_form(
-                    form_id,
-                    data,
-                    "meta"
-                )
+                    fields = lead_data.get("field_data", [])
 
-    return Response({"status": "ok"})
+                    data = {}
+
+                    for field in fields:
+                        data[field["name"]] = field["values"][0]
+
+                    LeadIngestionService.create_lead_from_form(
+                        form_id,
+                        data,
+                        "meta"
+                    )
+
+        return Response({"status": "ok"})
 
 
 
 
-@api_view(["GET"])
-def verify_meta(request):
-
-    VERIFY_TOKEN = "crm_verify_token"
-
-    mode = request.GET.get("hub.mode")
-    token = request.GET.get("hub.verify_token")
-    challenge = request.GET.get("hub.challenge")
-
-    if mode == "subscribe" and token == VERIFY_TOKEN:
-        return Response(challenge)
-
-    return Response(status=403)
+    
