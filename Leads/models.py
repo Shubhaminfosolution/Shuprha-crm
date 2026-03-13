@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from Ads.models import Business, AdForm
 
 
 class Lead(models.Model):
@@ -64,3 +65,23 @@ class Lead(models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+
+
+
+business = models.ForeignKey(
+    Business,
+    on_delete=models.SET_NULL,
+    null=True
+)
+
+
+ad_form = models.ForeignKey(
+    AdForm, 
+    on_delete=models.SET_NULL,
+    null=True
+)
+
+source_platform = models.CharField(
+    max_length=50, 
+    blank=True
+)
