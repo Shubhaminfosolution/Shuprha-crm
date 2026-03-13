@@ -10,7 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+import dj_database_url
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +24,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-dirq!wh%0c24n4r=wja=ih*)d2dooj0ld#ha!$vg3uky_t!z4$'
+SECRET_KEY = os.getenv("SECRET_KEY", 'django-insecure-dirq!wh%0c24n4r=wja=ih*)d2dooj0ld#ha!$vg3uky_t!z4$')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "True")==True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "127.0.0.1, localhost").split(",")
 
 AUTH_USER_MODEL = 'Users.User'
 
@@ -44,6 +48,7 @@ INSTALLED_APPS = [
     'Leads',
     'Activities',
     'import_export',
+    'Ads',
 ]
 
 MIDDLEWARE = [
@@ -80,10 +85,12 @@ WSGI_APPLICATION = 'Company.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    "default": dj_database_url.parse(
+        os.getenv(
+            "DATABASE_URL",
+            f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
+        )
+    )
 }
 
 
@@ -121,7 +128,16 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+META_ACCESS_TOKEN = os.getenv("META_ACCESS_TOKEN", "")
+
+# Static files (important for Railway)
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
+# Security for production
+CSRF_TRUSTED_ORIGINS = [
+    f"https://{host}" for host in ALLOWED_HOSTS if host not in ["127.0.0.1", "localhost"]
+]
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -131,3 +147,5 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
     ),
 }
+
+ 

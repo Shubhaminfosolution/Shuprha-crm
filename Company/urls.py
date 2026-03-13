@@ -30,4 +30,5 @@ urlpatterns = [
     path("api/v1/", include("Users.urls")), 
     path("api/v1/", include("Leads.urls")),
     path("api/v1/", include("Activities.urls")),
+    path("ads/", include("Ads.urls")),
 ]
