@@ -1,1 +1,1 @@
-web: gunicorn Company.wagi:application 
+web: gunicorn Company.wsgi:application 
