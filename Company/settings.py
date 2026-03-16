@@ -140,6 +140,7 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # Security for production
 CSRF_TRUSTED_ORIGINS = [
     "https://*.railway.app",
+    "https://crm.shuprha.com"
 ]
 
 REST_FRAMEWORK = {
