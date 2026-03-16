@@ -49,12 +49,14 @@ INSTALLED_APPS = [
     'Activities',
     'import_export',
     'Ads',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -152,4 +154,9 @@ REST_FRAMEWORK = {
     ),
 }
 
- 
+
+
+CORS_ALLOWED_ORIGINS = [
+    "https://shuprha-web.vercel.app",
+    "https://crm.shuprha.com"
+]
