@@ -90,9 +90,8 @@ WSGI_APPLICATION = 'Company.wsgi.application'
 
 DATABASES = {
     "default": dj_database_url.parse(
-        os.getenv(
            os.environ["DATABASE_URL"]
-        )
+        
     )
 }
 
