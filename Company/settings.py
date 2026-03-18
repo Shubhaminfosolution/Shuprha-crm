@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 import dj_database_url
+from django.db import connection
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -90,11 +91,16 @@ WSGI_APPLICATION = 'Company.wsgi.application'
 DATABASES = {
     "default": dj_database_url.parse(
         os.getenv(
-            "DATABASE_URL",
-            f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
+           os.environ["DATABASE_URL"]
         )
     )
 }
+
+print("------DB-----")
+print(connection.settings_dict["ENGINE"])
+print(connection.settings_dict["NAME"])
+print("==============")
+
 
 
 # Password validation
