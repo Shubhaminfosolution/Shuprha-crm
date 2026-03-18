@@ -43,7 +43,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     created_at = models.DateTimeField(default=timezone.now)
 
-    object = UserManager()
+    objects = UserManager()
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []

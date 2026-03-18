@@ -7,6 +7,6 @@ from .permissions import IsAdmin
 
 
 class UserViewSet(ModelViewSet):
-    queryset = User.object.all()
+    queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, IsAdmin] 
