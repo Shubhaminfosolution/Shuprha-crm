@@ -95,10 +95,6 @@ DATABASES = {
     )
 }
 
-print("------DB-----")
-print(connection.settings_dict["ENGINE"])
-print(connection.settings_dict["NAME"])
-print("==============")
 
 
 
