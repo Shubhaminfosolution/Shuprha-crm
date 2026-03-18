@@ -90,7 +90,7 @@ WSGI_APPLICATION = 'Company.wsgi.application'
 
 DATABASES = {
     "default": dj_database_url.parse(
-           os.environ.get("DATABASE_URL", "sqlite:///db.sqlit3")
+           os.environ.get("DATABASE_URL", "sqlite:///db.sqlite3")
         
     )
 }
