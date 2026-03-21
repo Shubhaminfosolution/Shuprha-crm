@@ -158,3 +158,8 @@ CORS_ALLOWED_ORIGINS = [
     "https://shuprha-web.vercel.app",
     "https://crm.shuprha.com"
 ]
+
+
+AUTHENTICATION_BACKENDS = [
+    'Users.backends.EmailBackend',
+]
