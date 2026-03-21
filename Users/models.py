@@ -45,7 +45,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     role = models.CharField(max_length=20, choices=Role_choices)
 
     is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
     is_deleted = models.BooleanField(default=False)
     
     created_at = models.DateTimeField(default=timezone.now)
