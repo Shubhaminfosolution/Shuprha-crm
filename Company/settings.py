@@ -161,5 +161,5 @@ CORS_ALLOWED_ORIGINS = [
 
 
 AUTHENTICATION_BACKENDS = [
-    'Users.backends.EmailBackend',
+    'Users.backends.EmailBackend'
 ]
