@@ -6,7 +6,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.decorators import action 
 from rest_framework.response import Response
-
+from django.db.models import OuterRef, Subquery
+from Activities.models import Activity
 
 class LeadViewSet(ModelViewSet):
     serializer_class = LeadSerializer
@@ -59,3 +60,21 @@ class LeadViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(created_by = self.request.user)
+
+    queryset = Lead.objects.all()
+
+    @action(detail=True, methods=["POST"])
+    def whatsapp_click(self, request, pk=None):
+        lead = self.get_object()
+
+        Activity.objects.create(
+            lead=lead,
+            activity_type="whatsapp",
+            notes="Whatsapp chat initiated",
+            performed_by=request.user 
+        )
+
+        return Response(
+            {"message":"Whatsapp activity logged"},
+            status = status.HTTP_200_OK
+        )

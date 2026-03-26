@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import Lead
 from Activities.serializers import ActivitySerializer
 from django.utils import timezone
+from Leads.services.whatsapp_service import generate_whatsapp_link
 
 
 class LeadSerializer(serializers.ModelSerializer):
@@ -22,3 +23,6 @@ class LeadSerializer(serializers.ModelSerializer):
         if activity:
             return ActivitySerializer(activity).data
         return None
+    
+    def get_whatsapp_link(self, obj):
+        return generate_whatsapp_link(obj.first_name,obj.phone)
