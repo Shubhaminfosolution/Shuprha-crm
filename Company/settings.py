@@ -15,6 +15,11 @@ from pathlib import Path
 from dotenv import load_dotenv
 import dj_database_url
 from django.db import connection
+from celery import Celery
+from datetime import timedelta
+
+
+load_dotenv()
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -44,13 +49,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
     'django_filters',
     'Users', 
-    'Leads',
+    'Leads.apps.LeadsConfig',
     'Activities',
     'import_export',
     'Ads',
     'corsheaders',
+
 ]
 
 MIDDLEWARE = [
@@ -70,7 +77,7 @@ ROOT_URLCONF = 'Company.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -122,7 +129,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
@@ -138,18 +148,25 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
+
+WHATSAPP_ACCESS_TOKEN = "EAAUzYVHgZCJ0BRBd05HHHSYfZBWH49tuYFmq38hm1q1riyf7D9e7a5hRSWEN6hcVTYNxSJ5HlZATfyFAMYtEm7ljylZByrQOLoGspSX56RsDx532NWhQBqMZBrVPNglIC7CL8kyyx7kelqI5QHZCzQCCSMZBI3ZBJ9tflZBhuh3rcniy17Y99YhIz6op2yJjQ6rnsa64fIU3Tj3ZC4zrxO7pFnZCc4s3w6TFAnQWZCtm1ZB7wG6NScoYHmKndgSNv8pxvwmSV7GCQw1ESvWVC6LyDK5t8VLAZD"
+PHONE_NUMBER_ID = "1088135897714051"
 META_ACCESS_TOKEN = os.getenv("META_ACCESS_TOKEN", "")
 
 # Static files (important for Railway)
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+]
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Security for production
 CSRF_TRUSTED_ORIGINS = [
-    "https://*.railway.app",
-    "https://crm.shuprha.com"
+    'https://*.railway.app',
+    'https://crm.shuprha.com',
+    'https://*.ngrok-free.dev',  # ← add this
 ]
 
 REST_FRAMEWORK = {
@@ -172,3 +189,18 @@ CORS_ALLOWED_ORIGINS = [
 AUTHENTICATION_BACKENDS = [
     'Users.backends.EmailBackend'
 ]
+
+
+
+TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
+TWILIO_WHATSAPP_NUMBER = os.getenv("TWILIO_WHATSAPP_NUMBER")
+
+
+
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+TIME_ZONE = 'Asia/Kolkata'
+USE_TZ = True
+

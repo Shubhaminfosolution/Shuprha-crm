@@ -20,15 +20,17 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
+from Leads.views import EmailTokenView
+
 
 urlpatterns = [
     path("admin/", admin.site.urls),
 
-    path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/token/", EmailTokenView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
 
     path("api/v1/", include("Users.urls")), 
     path("api/v1/", include("Leads.urls")),
     path("api/v1/", include("Activities.urls")),
-    path("ads/", include("Ads.urls")),
+    path("api/v1/", include("Ads.urls")),
 ]

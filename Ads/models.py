@@ -2,7 +2,7 @@ from django.db import models
 
 
 class Business(models.Model):
-
+    
     name = models.CharField(max_length=255)
     website = models.URLField(blank=True)
     contact_person = models.CharField(max_length=255)

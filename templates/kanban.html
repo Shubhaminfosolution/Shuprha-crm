@@ -1,0 +1,307 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pipeline — CRM</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <style>
+        /* ── KANBAN LAYOUT ── */
+        .kanban-wrapper {
+            display: flex;
+            gap: 14px;
+            overflow-x: auto;
+            padding-bottom: 20px;
+            align-items: flex-start;
+        }
+
+        .kanban-col {
+            min-width: 240px;
+            max-width: 240px;
+            background: var(--surface-2);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            max-height: calc(100vh - 180px);
+        }
+
+        .kanban-col-header {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            background: var(--surface-2);
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            z-index: 1;
+        }
+
+        .kanban-col-title {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .col-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .col-count {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-3);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1px 8px;
+            font-family: var(--font-mono);
+        }
+
+        .kanban-cards {
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow-y: auto;
+            flex: 1;
+            min-height: 80px;
+        }
+
+        /* Drop zone highlight */
+        .kanban-cards.drag-over {
+            background: var(--accent-light);
+            border-radius: var(--radius);
+        }
+
+        /* ── LEAD CARD ── */
+        .lead-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 12px;
+            cursor: grab;
+            transition: all var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .lead-card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 3px;
+            border-radius: 3px 0 0 3px;
+        }
+
+        .lead-card:hover {
+            border-color: var(--accent);
+            box-shadow: var(--shadow);
+            transform: translateY(-1px);
+        }
+
+        .lead-card.dragging {
+            opacity: 0.4;
+            cursor: grabbing;
+        }
+
+        .card-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-1);
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-phone {
+            font-size: 11px;
+            color: var(--text-3);
+            font-family: var(--font-mono);
+            margin-bottom: 8px;
+        }
+
+        .card-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+        }
+
+        .card-source {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 7px;
+            border-radius: 20px;
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+
+        .card-time {
+            font-size: 10px;
+            color: var(--text-3);
+            font-family: var(--font-mono);
+        }
+
+        .card-score {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-2);
+        }
+
+        /* ── COLUMN COLORS ── */
+        .col-new      .col-dot { background: #4361EE; }
+        .col-contacted .col-dot { background: #F5A623; }
+        .col-qualified  .col-dot { background: #7C3AED; }
+        .col-proposal   .col-dot { background: #0EA5E9; }
+        .col-converted  .col-dot { background: #0ECB81; }
+        .col-lost       .col-dot { background: #F03D3D; }
+
+        .col-new      .lead-card::before { background: #4361EE; }
+        .col-contacted .lead-card::before { background: #F5A623; }
+        .col-qualified  .lead-card::before { background: #7C3AED; }
+        .col-proposal   .lead-card::before { background: #0EA5E9; }
+        .col-converted  .lead-card::before { background: #0ECB81; }
+        .col-lost       .lead-card::before { background: #F03D3D; }
+
+        /* ── PIPELINE STATS ── */
+        .pipeline-stats {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-pill {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 8px 14px;
+            font-size: 12px;
+            color: var(--text-2);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat-pill strong {
+            color: var(--text-1);
+            font-family: var(--font-mono);
+            font-size: 14px;
+        }
+
+        /* ── EMPTY STATE ── */
+        .empty-col {
+            text-align: center;
+            padding: 20px 10px;
+            color: var(--text-3);
+            font-size: 12px;
+        }
+
+        /* ── SCROLLBAR ── */
+        .kanban-cards::-webkit-scrollbar { width: 4px; }
+        .kanban-cards::-webkit-scrollbar-track { background: transparent; }
+        .kanban-cards::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+        .kanban-wrapper::-webkit-scrollbar { height: 6px; }
+        .kanban-wrapper::-webkit-scrollbar-track { background: var(--surface-2); border-radius: 6px; }
+        .kanban-wrapper::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 6px; }
+
+        /* ── TOAST OVERRIDE ── */
+        .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; }
+    </style>
+</head>
+
+<body>
+
+<div id="globalLoader" class="global-loader d-none"><div class="spinner"></div></div>
+<div id="toastContainer" class="toast-container"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="logo-text"><span class="logo-dot"></span><span>CRM</span></div>
+        <button class="toggle-btn" id="sidebarToggle">☰</button>
+    </div>
+    <nav>
+        <div class="nav-section-label">Menu</div>
+        <a href="/api/v1/dashboard-ui/" class="nav-link"><span class="nav-icon">📊</span><span>Dashboard</span></a>
+        <a href="/api/v1/leads-ui/" class="nav-link"><span class="nav-icon">👥</span><span>Leads</span></a>
+        <a href="/api/v1/appointments-ui/" class="nav-link"><span class="nav-icon">📅</span><span>Appointments</span></a>
+        <a href="/api/v1/pipeline-ui/" class="nav-link active"><span class="nav-icon">🗂</span><span>Pipeline</span></a>
+    </nav>
+    <div class="sidebar-footer">
+        <a href="#" onclick="logout()" class="nav-link" style="color:var(--red);">
+            <span class="nav-icon">🚪</span><span>Logout</span>
+        </a>
+    </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main" id="mainContent">
+
+    <!-- HEADER -->
+    <div class="page-header">
+        <div>
+            <div class="page-title">Pipeline</div>
+            <div class="page-subtitle">Drag leads across stages to update their status</div>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-ghost btn-sm" onclick="loadKanban()">↺ Refresh</button>
+            <button class="theme-btn" id="themeToggle">🌙</button>
+        </div>
+    </div>
+
+    <!-- PIPELINE STATS -->
+    <div class="pipeline-stats" id="pipelineStats">
+        <div class="stat-pill">Total <strong id="stat-total">—</strong></div>
+        <div class="stat-pill">🔥 Hot Leads <strong id="stat-hot">—</strong></div>
+        <div class="stat-pill">✅ Converted <strong id="stat-converted">—</strong></div>
+        <div class="stat-pill">📈 Conversion Rate <strong id="stat-rate">—</strong></div>
+    </div>
+
+    <!-- KANBAN BOARD -->
+    <div class="kanban-wrapper" id="kanbanBoard">
+        <!-- Columns injected by JS -->
+    </div>
+
+</main>
+
+<script src="{% static 'js/main.js' %}"></script>
+<script src="{% static 'js/kanban.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+
+
+<script>
+// Sidebar
+document.getElementById("sidebarToggle").addEventListener("click", () => {
+    document.getElementById("sidebar").classList.toggle("collapsed");
+});
+
+// Theme
+const themeBtn = document.getElementById("themeToggle");
+const saved = localStorage.getItem("theme") || "light";
+if (saved === "dark") { document.documentElement.setAttribute("data-theme", "dark"); themeBtn.textContent = "☀️"; }
+themeBtn.addEventListener("click", () => {
+    const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    document.documentElement.setAttribute("data-theme", isDark ? "light" : "dark");
+    themeBtn.textContent = isDark ? "🌙" : "☀️";
+    localStorage.setItem("theme", isDark ? "light" : "dark");
+});
+</script>
+
+</body>
+</html>

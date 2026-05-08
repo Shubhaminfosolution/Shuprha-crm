@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CRM Login</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            font-family: "Segoe UI", sans-serif;
+            background: linear-gradient(120deg, #f1f5f9, #e0e7ff);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;   /* 🔥 FIX */
+            position: relative; /* 🔥 IMPORTANT */
+        }
+
+        /* GLOW ELEMENTS */
+        body::before,
+        body::after {
+            content: "";
+            position: absolute;
+            z-index: 0;  /* keep behind UI */
+            pointer-events: none; /* avoid interaction issues */
+        }
+
+        body::before {
+            width: 500px;
+            height: 500px;
+            background: #6366f1;
+            border-radius: 50%;
+            filter: blur(120px);
+            top: -100px;
+            left: -100px;
+        }
+
+        body::after {
+            width: 400px;
+            height: 500px;
+            background: #a78bfa;
+            border-radius: 50%;
+            filter: blur(120px);
+            bottom: -100px;
+            right: -100px;
+        }
+
+        .login-container {
+            width: 800px;
+            height: 500px;
+            background: white;
+            border-radius: 25px;
+            overflow: hidden;
+            display: flex;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+        }
+
+        /* LEFT SIDE */
+        .login-left {
+            width: 50%;
+            padding: 40px;
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .login-left h2 {
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .btn-login {
+            width: 100%;
+            border-radius: 10px;
+            padding: 10px;
+            background: #6f2dbd;
+            color: white;
+            border: none;
+            font-weight: 500;
+        }
+
+        .btn-login:hover {
+            background: #5a189a;
+        }
+
+        /* RIGHT SIDE */
+        .login-right {
+            width: 50%;
+            background: #eef2ff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-right img {
+            width: 380px;
+        }
+
+        .login-right h5 {
+            margin-top: 20px;
+            font-weight: 600;
+        }
+
+        .login-right p {
+            font-size: 13px;
+            color: #666;
+            text-align: center;
+            width: 80%;
+        }
+
+        /* PASSWORD TOGGLE */
+        .password-wrapper {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 35%;
+            cursor: pointer;
+        }
+
+        /* LOADER */
+        .loader-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .input-group-custom {
+          position: relative;
+          margin-bottom: 15px;
+      }
+
+      .input-group-custom input {
+          width: 100%;
+          padding: 10px 40px 10px 40px; /* left + right spacing */
+          border-radius: 10px;
+      }
+
+      /* LEFT ICON (same for both) */
+      .input-icon {
+          position: absolute;
+          left: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: #6c757d;
+          font-size: 18px;
+      }
+
+      /* RIGHT ICON (eye) */
+      .toggle-password {
+          position: absolute;
+          right: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          cursor: pointer;
+          font-size: 18px;
+          color: #6c757d;
+      }
+    </style>
+</head>
+
+<body>
+
+<div class="login-container">
+
+    <!-- LEFT -->
+    <div class="login-left">
+        <h2>Login</h2>
+
+        <form id="loginForm">
+            
+            <div class="input-group-custom">
+                <i class="bi bi-person input-icon"></i>
+                <input type="text" id="email" placeholder="Username or email" class="form-control">
+            </div>
+
+            <div class="input-group-custom">
+                <i class="bi bi-lock input-icon"></i>
+                <input type="password" id="password" placeholder="Password" class="form-control">
+
+                <span class="toggle-password" onclick="togglePassword()">
+                    <i id="eyeIcon" class="bi bi-eye"></i>
+                </span>
+            </div>
+
+            <div class="d-flex justify-content-between mb-3">
+                <div>
+                    <input type="checkbox" id="rememberMe"> Remember me
+                </div>
+
+            </div>
+
+            <button type="submit" id="loginBtn" class="btn-login">Login</button>
+
+        </form>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="login-right">
+        <!-- 👉 USE YOUR IMAGE HERE -->
+        <img src="/static/images/characters.png" alt="characters">
+
+    </div>
+
+</div>
+
+<!-- LOADER -->
+<div id="loader" class="loader-overlay d-none">
+    <div class="spinner-border text-light"></div>
+</div>
+
+<!-- TOAST -->
+<div id="toastContainer" style="position:fixed; top:20px; right:20px;"></div>
+
+<script>
+// 🔄 LOADER
+function showLoader() {
+    document.getElementById("loader").classList.remove("d-none");
+}
+function hideLoader() {
+    document.getElementById("loader").classList.add("d-none");
+}
+
+// 🔔 TOAST
+function showToast(message, type="error") {
+    const div = document.createElement("div");
+    div.innerText = message;
+    div.style.background = type === "error" ? "#e74a3b" : "#1cc88a";
+    div.style.color = "white";
+    div.style.padding = "10px";
+    div.style.marginTop = "10px";
+    div.style.borderRadius = "8px";
+
+    document.getElementById("toastContainer").appendChild(div);
+    setTimeout(() => div.remove(), 3000);
+}
+
+// 👁 PASSWORD
+function togglePassword() {
+    const input = document.getElementById("password");
+    input.type = input.type === "password" ? "text" : "password";
+}
+
+// 🧠 AUTO LOGIN
+window.addEventListener("DOMContentLoaded", () => {
+    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+    if (token) {
+        window.location.href = "/api/v1/dashboard-ui/";
+    }
+});
+
+// 🔐 LOGIN
+document.getElementById("loginForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const btn = document.getElementById("loginBtn");
+    btn.disabled = true;
+
+    showLoader();
+
+    const remember = document.getElementById("rememberMe").checked;
+
+    fetch("/api/token/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            email: document.getElementById("email").value,
+            password: document.getElementById("password").value
+        })
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("Invalid credentials");
+        return res.json();
+    })
+    .then(data => {
+
+        localStorage.setItem("token", data.access)
+
+        showToast("Login successful", "success");
+
+        setTimeout(() => {
+            window.location.href = "/api/v1/dashboard-ui/";
+        }, 800);
+    })
+    .catch(err => showToast(err.message, "error"))
+    .finally(() => {
+        hideLoader();
+        btn.disabled = false;
+    });
+});
+</script>
+
+</body>
+</html>
+
+
+
+
+

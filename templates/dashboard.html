@@ -1,0 +1,223 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — CRM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<div id="globalLoader" class="global-loader d-none">
+    <div class="spinner"></div>
+</div>
+<div id="toastContainer" class="toast-container"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="logo-text">
+            <span class="logo-dot"></span>
+            <span>CRM</span>
+        </div>
+        <button class="toggle-btn" id="sidebarToggle">☰</button>
+    </div>
+
+    <nav>
+        <div class="nav-section-label">Menu</div>
+        <a href="/api/v1/dashboard-ui/" class="nav-link active">
+            <span class="nav-icon">📊</span>
+            <span>Dashboard</span>
+        </a>
+        <a href="/api/v1/leads-ui/" class="nav-link">
+            <span class="nav-icon">👥</span>
+            <span>Leads</span>
+        </a>
+        <a href="/api/v1/appointments-ui/" class="nav-link">
+            <span class="nav-icon">📅</span>
+            <span>Appointments</span>
+        </a>
+        <a href="/api/v1/pipeline-ui/" class="nav-link">
+            <span class="nav-icon">🗂</span><span>Pipeline</span>
+        </a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <a href="/api/v1/logout/" onclick="logout()" class="nav-link" style="color: var(--red);">
+            <span class="nav-icon">🚪</span>
+            <span>Logout</span>
+        </a>  
+    </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main" id="mainContent">
+
+    <!-- HEADER -->
+    <div class="page-header">
+        <div>
+            <div class="page-title">Dashboard</div>
+            <div class="page-subtitle" id="greetingText">Good morning — here's what's happening today.</div>
+        </div>
+        <div class="header-actions">
+            <select id="filter" class="form-select filter-box">
+                <option value="7">Last 7 Days</option>
+                <option value="1">Today</option>
+                <option value="30">Last 30 Days</option>
+            </select>
+            <button class="theme-btn" id="themeToggle" title="Toggle theme">🌙</button>
+        </div>
+    </div>
+
+    <!-- KPI GRID -->
+    <div class="kpi-grid">
+        <div class="card kpi-card blue">
+            <div class="kpi-icon blue">👥</div>
+            <div class="kpi-label">Total Leads</div>
+            <div class="kpi-value" id="total_leads">—</div>
+            <div class="kpi-badge neutral" id="kpi_badge_leads">Loading...</div>
+        </div>
+        <div class="card kpi-card green">
+            <div class="kpi-icon green">✨</div>
+            <div class="kpi-label">Today's Leads</div>
+            <div class="kpi-value" id="today_leads">—</div>
+            <div class="kpi-badge neutral">New today</div>
+        </div>
+        <div class="card kpi-card yellow">
+            <div class="kpi-icon yellow">📅</div>
+            <div class="kpi-label">Appointments</div>
+            <div class="kpi-value" id="total_appointments">—</div>
+            <div class="kpi-badge neutral">All time</div>
+        </div>
+        <div class="card kpi-card purple">
+            <div class="kpi-icon purple">✅</div>
+            <div class="kpi-label">Completed</div>
+            <div class="kpi-value" id="completed">—</div>
+            <div class="kpi-badge neutral">Closed deals</div>
+        </div>
+    </div>
+
+    <!-- METRIC STRIP -->
+    <div class="metric-strip">
+        <div class="metric-box">
+            <div class="metric-label">Conversion Rate</div>
+            <div class="metric-value" id="conversion_rate">—</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">Appointment Rate</div>
+            <div class="metric-value" id="appointment_rate">—</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">Best Source</div>
+            <div class="metric-value" id="best_source" style="font-size:15px;font-family:var(--font)">—</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">Stale Leads</div>
+            <div class="metric-value" id="stale_leads" style="color:var(--red)">—</div>
+        </div>
+
+    
+    </div>
+        <!-- TODAY'S PRIORITY WIDGET -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px;">
+
+        <!-- LEFT — Today's Appointments -->
+        <div class="card p-4">
+            <div class="chart-header">
+                <div class="chart-title">📅 Today's Appointments</div>
+                <span class="badge badge-new" id="apt-count">0</span>
+            </div>
+            <div id="todayAppointments">
+                <div style="color:var(--text-3); font-size:13px;">No appointments today</div>
+            </div>
+        </div>
+
+        <!-- RIGHT — Today's Follow-ups -->
+        <div class="card p-4">
+            <div class="chart-header">
+                <div class="chart-title">🔄 Today's Follow-ups</div>
+                <span class="badge badge-new" id="followup-count">0</span>
+            </div>
+            <div id="todayFollowups">
+                <div style="color:var(--text-3); font-size:13px;">No follow-ups today</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- CHARTS -->
+    <div class="chart-grid">
+        <div class="card chart-card">
+            <div class="chart-header">
+                <div class="chart-title">Leads Trend</div>
+                <span class="badge badge-new">Live</span>
+            </div>
+            <canvas id="leadsChart" height="100"></canvas>
+        </div>
+        <div class="card chart-card">
+            <div class="chart-header">
+                <div class="chart-title">Lead Sources</div>
+            </div>
+            <canvas id="sourceChart"></canvas>
+        </div>
+    </div>
+
+    <!-- FUNNEL -->
+    <div class="card p-4">
+        <div class="chart-header">
+            <div class="chart-title">Sales Funnel</div>
+        </div>
+        <div class="funnel-grid">
+            <div class="funnel-step">
+                <div class="funnel-num" id="f_leads">—</div>
+                <div class="funnel-label">Total Leads</div>
+            </div>
+            <div class="funnel-step">
+                <div class="funnel-num" id="f_appointments">—</div>
+                <div class="funnel-label">Appointments</div>
+            </div>
+            <div class="funnel-step">
+                <div class="funnel-num" id="f_completed">—</div>
+                <div class="funnel-label">Completed</div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<!-- SCRIPTS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'js/main.js' %}"></script>
+<script src="{% static 'js/dashboard.js' %}"></script>
+
+<script>
+// Greeting
+const hour = new Date().getHours();
+const greet = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+document.getElementById("greetingText").textContent = `${greet} — here's what's happening today.`;
+
+// Sidebar toggle
+document.getElementById("sidebarToggle").addEventListener("click", () => {
+    document.getElementById("sidebar").classList.toggle("collapsed");
+});
+
+// Theme toggle
+const themeBtn = document.getElementById("themeToggle");
+const saved = localStorage.getItem("theme") || "light";
+if (saved === "dark") { document.documentElement.setAttribute("data-theme", "dark"); themeBtn.textContent = "☀️"; }
+themeBtn.addEventListener("click", () => {
+    const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    document.documentElement.setAttribute("data-theme", isDark ? "light" : "dark");
+    themeBtn.textContent = isDark ? "🌙" : "☀️";
+    localStorage.setItem("theme", isDark ? "light" : "dark");
+});
+</script>
+
+</body>
+</html>

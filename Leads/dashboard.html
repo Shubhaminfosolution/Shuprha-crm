@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+</head>
+<body>
+    <div class="row">
+  <div class="col-md-3">
+    <div class="card p-3 shadow">
+      <h6>Total Leads</h6>
+      <h3 id="total_leads">0</h3>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="card p-3 shadow">
+      <h6>Today's Leads</h6>
+      <h3 id="today_leads">0</h3>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="card p-3 shadow">
+      <h6>Total Appointments</h6>
+      <h3 id="total_appointments">0</h3>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="card p-3 shadow">
+      <h6>Completed</h6>
+      <h3 id="completed">0</h3>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+fetch("/dashboard/")
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById("total_leads").innerText = data.total_leads;
+    document.getElementById("today_leads").innerText = data.today_leads;
+    document.getElementById("total_appointments").innerText = data.total_appointments;
+    document.getElementById("completed").innerText = data.completed;
+  });
+</script>
+
+<canvas id="leadsChart"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+fetch("/dashboard/")
+  .then(res => res.json())
+  .then(data => {
+
+    const labels = data.leads_trend.map(x => x.created_at__date);
+    const values = data.leads_trend.map(x => x.count);
+
+    new Chart(document.getElementById("leadsChart"), {
+      type: "line",
+      data: {
+        labels: labels,
+        datasets: [{
+          label: "Leads Trend",
+          data: values
+        }]
+      }
+    });
+
+  });
+</script>
+</body>
+</html>

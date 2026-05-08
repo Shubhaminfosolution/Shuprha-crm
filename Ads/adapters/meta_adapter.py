@@ -7,12 +7,13 @@ class MetaAdapter:
     def __init__(self, access_token):
         self.access_token = access_token
 
-    def fetch_lead(self, leadgen_id):
+    def get_lead(self, leadgen_id):  # ← rename from fetch_lead to get_lead
 
-        url = f"{self.BASE_URL}/{leadgen_id}/leads"
+        url = f"{self.BASE_URL}/{leadgen_id}"  # ← remove /leads from URL
 
         params = {
-            "access_token":self.access_token
+            "access_token": self.access_token,
+            "fields": "field_data"  # ← tell Meta which fields to return
         }
 
         response = requests.get(url, params=params)

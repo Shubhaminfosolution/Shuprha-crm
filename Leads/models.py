@@ -3,6 +3,8 @@ from django.conf import settings
 from Ads.models import Business, AdForm
 
 
+
+
 class Lead(models.Model):
 
     STATUS_CHOICES = [
@@ -14,6 +16,7 @@ class Lead(models.Model):
         ("proposal", "Proposal Sent"),
         ("converted", "Converted"),
         ("lost", "Lost"),
+        ("spam", "Spam"),
     ]
 
     SOURCE_CHOICES = [
@@ -26,13 +29,14 @@ class Lead(models.Model):
 
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
-    email = models.EmailField(db_index=True)
+    email = models.EmailField(db_index=True, blank=True)
     phone = models.CharField(max_length=12, db_index=True)
 
     company_name = models.CharField(max_length=255, blank=True)
 
     source = models.CharField(max_length=45, choices=SOURCE_CHOICES)
-    status = models.CharField(max_length=45, choices=STATUS_CHOICES, default="new")
+
+    status = models.CharField(max_length=45, choices=STATUS_CHOICES)
 
     assigned_to= models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -68,20 +72,47 @@ class Lead(models.Model):
 
 
 
-business = models.ForeignKey(
-    Business,
-    on_delete=models.SET_NULL,
-    null=True
-)
+    business = models.ForeignKey(
+        Business,
+        on_delete=models.SET_NULL,
+        null=True
+    )
 
 
-ad_form = models.ForeignKey(
-    AdForm, 
-    on_delete=models.SET_NULL,
-    null=True
-)
+    ad_form = models.ForeignKey(
+        AdForm, 
+        on_delete=models.SET_NULL,
+        null=True
+    )
 
-source_platform = models.CharField(
-    max_length=50, 
-    blank=True
-)
+    source_platform = models.CharField(
+        max_length=50, 
+        blank=True
+    )
+
+
+
+
+
+
+# appointment created here
+
+
+class Appointment(models.Model):
+    lead = models.ForeignKey('Lead', on_delete=models.CASCADE, related_name='appointments')
+    date_time = models.DateTimeField()
+    notes = models.TextField(blank=True, null=True)
+    status = models.CharField(
+        max_length=25, 
+        choices=[
+            ('scheduled', 'Scheduled'),
+            ('completed', 'Completed'),
+            ('cancelled', 'Cancelled'),
+            ('postponed', 'Postponed')
+        ],
+        default='scheduled'
+        )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.lead.first_name} - {self.date_time}"

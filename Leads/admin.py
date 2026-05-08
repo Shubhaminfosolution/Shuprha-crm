@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Lead
+from .models import Lead, Appointment
 from Activities.models import Activity
 from import_export.admin import ImportExportModelAdmin
 from .resources import LeadResource
@@ -147,3 +147,8 @@ class LeadAdmin(ImportExportModelAdmin):
         except Exception as e:
             return "whatsapp button error"
     whatsapp_button.short_description = "Whatsapp"
+
+
+
+
+admin.site.register(Appointment)
