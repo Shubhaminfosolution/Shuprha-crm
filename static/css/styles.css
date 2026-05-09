@@ -191,6 +191,26 @@ body {
 
 .nav-link.active .nav-icon { background: var(--accent); filter: none; }
 
+/* ── SIDEBAR ICONS ── */
+.nav-icon img {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    filter: invert(40%) sepia(0%) saturate(0%) brightness(90%);
+    transition: filter var(--transition);
+}
+
+/* Active state — blue icon */
+.nav-link.active .nav-icon img {
+    filter: invert(27%) sepia(94%) saturate(1752%) 
+            hue-rotate(220deg) brightness(97%) contrast(97%);
+}
+
+/* Hover state — slightly brighter */
+.nav-link:hover .nav-icon img {
+    filter: invert(15%) sepia(50%) saturate(500%) 
+            hue-rotate(220deg) brightness(90%);
+}
 .nav-link span { transition: opacity var(--transition); }
 .sidebar.collapsed .nav-link span,
 .sidebar.collapsed .nav-section-label,
