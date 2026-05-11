@@ -6,6 +6,14 @@ from .services.lead_ingestion_service import LeadIngestionService
 from Ads.models import AdForm
 from Ads.adapters.meta_adapter import MetaAdapter
 
+import hashlib
+import hmac
+import json
+from django.conf import settings
+from .tasks import process_meta_lead_task
+
+
+
 VERIFY_TOKEN = "crm_verify_token"
 
 @api_view(["GET", "POST"])
@@ -33,6 +41,13 @@ def meta_webhook(request):
         print("=" * 50)
 
         entry = request.data.get("entry", [])
+        sig_header = request.headers.get("X-Hub-Signature-256", "")
+        if not _verify_meta_signature(request.body, sig_header):
+            return HttpResponse(status=403)
+        try:
+            payload = json.loads(request.body)
+        except json.JSONDecodeError:
+            return HttpResponse(status=400)
 
         for item in entry:
             changes = item.get("changes", [])
@@ -63,3 +78,28 @@ def meta_webhook(request):
         return Response({"status": "ok"})
 
     return HttpResponse(status=405)  # ← catch all other methods
+
+
+
+
+
+def _verify_meta_signature(body: bytes, sig_header: str) -> bool:
+    """
+    Verifies the X-Hub-Signature-256 header from Meta.
+    Meta signs the raw request body with your app secret using HMAC-SHA256.
+    """
+    if not sig_header.startswith("sha256="):
+        return False
+
+    app_secret = settings.META_APP_SECRET
+    if not app_secret:
+        # If secret not configured, skip verification in dev only
+        return settings.DEBUG
+
+    expected = "sha256=" + hmac.new(
+        app_secret.encode("utf-8"),
+        body,
+        hashlib.sha256
+    ).hexdigest()
+
+    return hmac.compare_digest(expected, sig_header)
