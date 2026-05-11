@@ -5,8 +5,8 @@ from .models import User
 
 class UserAdmin(BaseUserAdmin):
     model = User
-    list_display = ("email", "full_name", "role", "business", "is_staff", "is_active")
-    list_filter = ("role", "business", "is_staff", "is_active")
+    list_display = ("email", "full_name", "role", "get_business", "is_staff", "is_active")
+    list_filter = ("role", "is_staff", "is_active")
 
     fieldsets = (
         (None, {"fields": ("email", "password")}),
@@ -27,6 +27,10 @@ class UserAdmin(BaseUserAdmin):
 
     search_fields = ("email", "full_name")
     ordering = ("email",)
+
+    def get_business(self, obj):
+        return obj.business.name if obj.business else "-"
+    get_business.short_description = "Business"
 
 
 admin.site.register(User, UserAdmin)
