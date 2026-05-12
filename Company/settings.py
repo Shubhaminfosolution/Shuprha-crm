@@ -57,7 +57,7 @@ INSTALLED_APPS = [
     'import_export',
     'Ads',
     'corsheaders',
-
+    'encrypted_model_fields',
 ]
 
 MIDDLEWARE = [
@@ -208,7 +208,7 @@ CELERY_TASK_SERIALIZER = 'json'
 TIME_ZONE = 'Asia/Kolkata'
 USE_TZ = True
 
-
+FIELD_ENCRYPTION_KEY = os.getenv("FIELD_ENCRYPTION_KEY", "")
 
 
 
