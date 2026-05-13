@@ -28,7 +28,7 @@ class Lead(models.Model):
 
     # Core fields
     first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100, blank=True)
     email = models.EmailField(db_index=True, blank=True)
     phone = models.CharField(max_length=15, db_index=True)
     company_name = models.CharField(max_length=255, blank=True)
