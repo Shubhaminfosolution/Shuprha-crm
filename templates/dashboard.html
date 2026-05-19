@@ -20,51 +20,126 @@
 <div id="toastContainer" class="toast-container"></div>
 
 <!-- SIDEBAR -->
+<!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
+
+    <!-- HEADER -->
     <div class="sidebar-header">
+
         <div class="logo-text">
             <span class="logo-dot"></span>
-            <span>CRM</span>
+            <span class="logo-name">CRM</span>
         </div>
-        <button class="toggle-btn" id="sidebarToggle">☰</button>
+
+        <button class="toggle-btn" id="sidebarToggle">
+            ☰
+        </button>
+
     </div>
 
+    <!-- NAVIGATION -->
     <nav>
-        <div class="nav-section-label">Menu</div>
+
+        <div class="nav-section-label">
+            Menu
+        </div>
+
+        <!-- DASHBOARD -->
         <a href="/api/v1/dashboard-ui/" class="nav-link active">
+
             <span class="nav-icon">
-                <img src="{% static 'icons/system-regular-10-analytics-hover-analytics.png' %}" width="18" height="18">
+                <img
+                    src="{% static 'icons/system-regular-10-analytics-hover-analytics.png' %}"
+                    width="18"
+                    height="18"
+                >
             </span>
-            <span>Dashboard</span>
+
+            <span class="nav-text">
+                Dashboard
+            </span>
+
         </a>
+
+        <!-- LEADS -->
         <a href="/api/v1/leads-ui/" class="nav-link">
+
             <span class="nav-icon">
-                <img src="{% static 'icons/lead-generation.png' %}" width="18" height="18">
+                <img
+                    src="{% static 'icons/lead-generation.png' %}"
+                    width="18"
+                    height="18"
+                >
             </span>
-            <span>Leads</span>
+
+            <span class="nav-text">
+                Leads
+            </span>
+
         </a>
+
+        <!-- APPOINTMENTS -->
         <a href="/api/v1/appointments-ui/" class="nav-link">
+
             <span class="nav-icon">
-                <img src="{% static 'icons/calendar.png' %}" width="18" height="18">
+                <img
+                    src="{% static 'icons/calendar.png' %}"
+                    width="18"
+                    height="18"
+                >
             </span>
-            <span>Appointments</span>
+
+            <span class="nav-text">
+                Appointments
+            </span>
+
         </a>
+
+        <!-- PIPELINE -->
         <a href="/api/v1/pipeline-ui/" class="nav-link">
+
             <span class="nav-icon">
-                <img src="{% static 'icons/scrum.png' %}" width="18" height="18">
+                <img
+                    src="{% static 'icons/scrum.png' %}"
+                    width="18"
+                    height="18"
+                >
             </span>
-            <span>Pipeline</span>
+
+            <span class="nav-text">
+                Pipeline
+            </span>
+
         </a>
+
     </nav>
 
+    <!-- FOOTER -->
     <div class="sidebar-footer">
-        <a href="/api/v1/logout/" onclick="logout()" class="nav-link" style="color: var(--red);">
+
+        <a
+            href="/api/v1/logout/"
+            onclick="logout()"
+            class="nav-link"
+            style="color: var(--red);"
+        >
+
             <span class="nav-icon">
-                <img src="{% static 'icons/logout.png' %}" width="18" height="18">
+                <img
+                    src="{% static 'icons/logout.png' %}"
+                    width="18"
+                    height="18"
+                >
             </span>
-            <span>Logout</span>
+
+            <span class="nav-text">
+                Logout
+            </span>
+
         </a>
+
     </div>
+
 </aside>
 
 <!-- MAIN -->
