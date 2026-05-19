@@ -118,9 +118,9 @@ body {
 }
 
 /* hide only the text, not the icon containers */
-.sidebar.collapsed .logo-text span:not(.logo-dot),
+.sidebar.collapsed .nav-text,
 .sidebar.collapsed .nav-section-label,
-.sidebar.collapsed .nav-link > span:not(.nav-icon),
+.sidebar.collapsed .logo-text span:not(.logo-dot),
 .sidebar.collapsed .sidebar-footer .nav-link > span:not(.nav-icon) {
   display: none !important;
 }
