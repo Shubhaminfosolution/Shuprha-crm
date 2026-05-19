@@ -103,13 +103,13 @@ body {
 }
 
 .sidebar.collapsed {
-  width: 72px;
-  padding: 16px 0;
+  width: 76px;
+  padding: 14px 0;
 }
 
 .sidebar.collapsed .sidebar-header {
   justify-content: center;
-  padding: 0 0 14px;
+  padding: 0 0 12px;
 }
 
 .sidebar.collapsed .logo-text {
@@ -117,42 +117,56 @@ body {
   gap: 0;
 }
 
-/* keep the dot visible, hide only the CRM text */
+/* hide only the text, not the icon containers */
 .sidebar.collapsed .logo-text span:not(.logo-dot),
 .sidebar.collapsed .nav-section-label,
-.sidebar.collapsed .nav-link span,
-.sidebar.collapsed .sidebar-footer span {
+.sidebar.collapsed .nav-link > span:not(.nav-icon),
+.sidebar.collapsed .sidebar-footer .nav-link > span:not(.nav-icon) {
   display: none !important;
 }
 
 .sidebar.collapsed nav {
-  padding: 4px 6px;
+  flex: 0 0 auto;
+  padding: 10px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 8px;
 }
 
 .sidebar.collapsed .nav-link {
-  width: 48px;
-  margin: 6px auto;
+  width: 52px;
+  height: 52px;
+  margin: 0 auto;
+  padding: 0;
   justify-content: center;
-  padding: 10px 0;
+  border-radius: 14px;
 }
 
 .sidebar.collapsed .nav-link .nav-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
 }
 
 .sidebar.collapsed .sidebar-footer {
-  padding: 12px 6px 4px;
+  padding: 10px 0 0;
+  display: flex;
+  justify-content: center;
 }
 
 .sidebar.collapsed .sidebar-footer .nav-link {
-  width: 48px;
+  width: 52px;
+  height: 52px;
   margin: 0 auto;
   justify-content: center;
+  padding: 0;
+}
+
+.sidebar.collapsed .sidebar-footer .nav-link .nav-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
 }
 
 .sidebar.collapsed .toggle-btn {
@@ -238,7 +252,6 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  font-size: 15px;
   flex-shrink: 0;
   background: transparent;
   transition: background var(--transition);
@@ -272,21 +285,12 @@ body {
   transition: opacity var(--transition);
 }
 
-.sidebar.collapsed .nav-link span,
-.sidebar.collapsed .nav-section-label,
-.sidebar.collapsed .logo-text span:not(.logo-dot) {
-  opacity: 0;
-  width: 0;
-  overflow: hidden;
-}
-
 .sidebar-footer {
   padding: 12px 10px 4px;
   border-top: 1px solid var(--border);
   margin-top: auto;
 }
 
-/* main */
 .main {
   flex: 1;
   margin-left: var(--sidebar-w);
@@ -296,7 +300,7 @@ body {
 }
 
 .sidebar.collapsed ~ .main {
-  margin-left: var(--sidebar-collapsed);
+  margin-left: 76px;
 }
 /* ── PAGE HEADER ── */
 .page-header {
