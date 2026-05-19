@@ -244,10 +244,6 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 
-<script>
-document.getElementById("sidebarToggle").addEventListener("click", () => {
-    document.getElementById("sidebar").classList.toggle("collapsed");
-});
 const themeBtn = document.getElementById("themeToggle");
 const saved = localStorage.getItem("theme") || "light";
 if (saved === "dark") { document.documentElement.setAttribute("data-theme", "dark"); themeBtn.textContent = "☀️"; }
