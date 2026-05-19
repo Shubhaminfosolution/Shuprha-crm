@@ -16,7 +16,6 @@
 // 🔌 AUTH FETCH
 // ===============================
 function authFetch(url, options = {}) {
-
     const token =
         localStorage.getItem("token") ||
         sessionStorage.getItem("token");
@@ -39,32 +38,31 @@ function authFetch(url, options = {}) {
 }
 
 
-
 let allLeads = [];
+
 
 // ===============================
 // 📊 LOAD LEADS
 // ===============================
 function loadLeads() {
+    // Use filter-specific IDs to avoid conflict with modal form fields
+    const search = document.getElementById("filterSearch")?.value || "";
+    const status = document.getElementById("filterStatus")?.value || "";
+    const source = document.getElementById("filterSource")?.value || "";
 
-    const search = document.getElementById("search")?.value || "";
-    const status = document.getElementById("status")?.value || "";
-    const source = document.getElementById("source")?.value || "";
+    const params = new URLSearchParams();
+    if (search) params.append("search", search);
+    if (status) params.append("status", status);
+    if (source) params.append("source", source);
 
-    const url = `/api/v1/leads/?search=${search}&status=${status}&source=${source}`;
-
+    const url = `/api/v1/leads/?${params.toString()}`;
     console.log("Fetching:", url);
 
     authFetch(url)
         .then(res => res.json())
         .then(data => {
-
-            console.log("API RESPONSE:", data);
-
-            // 🔥 HANDLE PAGINATION
             const leads = data.results || data;
             allLeads = leads;
-
             renderLeads(leads);
         })
         .catch(err => {
@@ -78,23 +76,20 @@ function loadLeads() {
 // 🎯 RENDER LEADS
 // ===============================
 function renderLeads(leads) {
-
     const table = document.getElementById("leadsTable");
     if (!table) return;
 
-    // 🧼 CLEAR
     table.innerHTML = "";
 
-    // ❌ EMPTY STATE
     if (!leads || leads.length === 0) {
-        table.innerHTML = "<tr><td colspan='6'>No leads found</td></tr>";
+        table.innerHTML = "<tr><td colspan='8'>No leads found</td></tr>";
         return;
     }
 
     let html = "";
 
     leads.forEach(lead => {
-    html += `
+        html += `
         <tr>
             <td>
                 <input type="checkbox" class="leadCheckbox" value="${lead.id}">
@@ -110,19 +105,18 @@ function renderLeads(leads) {
             <td>${lead.source || "-"}</td>
             <td>${lead.next_followup_date || "-"}</td>
             <td>
-                <button class="btn btn-success btn-sm" 
+                <button class="btn btn-success btn-sm"
                     onclick="sendWhatsApp('${lead.id}')">WhatsApp</button>
-                <button class="???" 
+                <button class="btn btn-danger btn-sm"
                     onclick="deleteLead(${lead.id})">Delete</button>
             </td>
         </tr>
-    `;
-});
+        `;
+    });
 
-// ❌ Remove the second forEach completely
     table.innerHTML = html;
 
-    // 🎨 APPLY STATUS BADGES
+    // Apply status badges after rendering
     leads.forEach(lead => {
         const el = document.getElementById(`status-${lead.id}`);
         if (el && lead.status) {
@@ -132,28 +126,61 @@ function renderLeads(leads) {
 }
 
 
-
-function deleteLead(id){
-    if (!confirm("Delete this Lead?")) return;
+// ===============================
+// 🗑️ DELETE LEAD (soft delete)
+// ===============================
+function deleteLead(id) {
+    if (!confirm("Delete this lead?")) return;
 
     authFetch(`/api/v1/leads/${id}/`, {
         method: "PATCH",
-        body:json.stringify({is_deleted:true})
+        body: JSON.stringify({ is_deleted: true })  // fixed: was json.stringify
     })
-    .then(() =>{
-        const leadId = getLeadId();
+    .then(() => {
+        showToast("Lead deleted", "success");
         loadLeads();
     })
-    .catch(err => console.error(err));
+    .catch(err => {
+        console.error(err);
+        showToast("Delete failed", "error");
+    });
 }
 
+
+// ===============================
+// 🗑️ BULK DELETE
+// ===============================
+function bulkDelete() {
+    const checked = document.querySelectorAll(".leadCheckbox:checked");
+
+    if (checked.length === 0) {
+        showToast("Select at least one lead first", "error");
+        return;
+    }
+
+    if (!confirm(`Delete ${checked.length} selected leads?`)) return;
+
+    Promise.all(
+        Array.from(checked).map(checkbox =>
+            authFetch(`/api/v1/leads/${checkbox.value}/`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ is_deleted: true })
+            })
+        )
+    )
+    .then(() => {
+        showToast(`${checked.length} leads deleted`, "success");
+        loadLeads();
+    })
+    .catch(() => showToast("Delete failed", "error"));
+}
 
 
 // ===============================
 // 💬 WHATSAPP ACTION
 // ===============================
 function sendWhatsApp(id) {
-
     authFetch(`/api/v1/leads/${id}/whatsapp_click/`, {
         method: "POST"
     })
@@ -173,9 +200,7 @@ function formatStatus(status) {
 }
 
 function applyStatusBadge(element, status) {
-
     const formatted = formatStatus(status);
-
     element.className = `status-badge status-${formatted}`;
     element.innerText = status;
 }
@@ -183,10 +208,12 @@ function applyStatusBadge(element, status) {
 
 // ===============================
 // 🔍 FILTER EVENTS
+// — IDs are now filterSearch, filterStatus, filterSource
+// — These must match your HTML filter input IDs
 // ===============================
-document.getElementById("search")?.addEventListener("input", debounce(loadLeads, 400));
-document.getElementById("status")?.addEventListener("change", loadLeads);
-document.getElementById("source")?.addEventListener("change", loadLeads);
+document.getElementById("filterSearch")?.addEventListener("input", debounce(loadLeads, 400));
+document.getElementById("filterStatus")?.addEventListener("change", loadLeads);
+document.getElementById("filterSource")?.addEventListener("change", loadLeads);
 
 
 // ===============================
@@ -202,96 +229,39 @@ function debounce(func, delay) {
 
 
 // ===============================
-// 🚀 INIT
+// ➕ SAVE LEAD (manual entry)
 // ===============================
-document.addEventListener("DOMContentLoaded", function () {
-    console.log("Leads JS Loaded");
-    loadLeads();
-});
-
-
-
-
-function exportCSV(){
-
-    const headers = ["first_name", "last_name", "email", "phone", "status", "source"]
-
-    const rows = allLeads.map(lead => [
-        lead.first_name,
-        lead.last_name,
-        lead.email,
-        lead.phone,
-        lead.status,
-        lead.source
-    ])
-
-    
-    const csv = [
-        headers.join(","),
-        ...rows
-    ].join("\n");
-    const blob = new Blob([csv], {type: "text/csv"})  // treat csv string, as a file
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "leads.csv";
-    a.click();
-
-    URL.revokeObjectURL(url);  
-
-    const worksheet = XLSX.utils.json_to_sheet(allLeads);  
-    const workbook = XLSX.utils.book_new();
-
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Dates");  
-    XLSX.writeFile(workbook, "export.xlsx");  
-}
-
-
-
-
-
-
 function saveLead() {
-
-
-
-    const first_name = document.getElementById("first_name").value;
-    const last_name = document.getElementById("last_name").value;
-    const leadStatus = document.getElementById("status").value;
-    const leadSource = document.getElementById("source").value;
-    const phone = document.getElementById("phone").value;
-    const email = document.getElementById("email").value;
+    const first_name = document.getElementById("first_name").value.trim();
+    const last_name = document.getElementById("last_name").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const leadStatus = document.getElementById("leadStatus").value;   // modal field IDs
+    const leadSource = document.getElementById("leadSource").value;   // renamed to avoid filter conflict
 
     if (!first_name) {
-        showToast("first name is required", "error");
+        showToast("First name is required", "error");
         return;
     }
 
-    if (!email) {
-        showToast("Email is required", "error");
+    if (!phone) {
+        showToast("Phone is required", "error");
         return;
     }
-    
+
     showLoader();
-    
-    const url = `/api/v1/leads/`;
-    const method = "POST";
 
-    authFetch(url, {                                           // this is a kind of HTTP request that we send to the backend means the djnago through urls
-        method: method,
-        headers: { "Content-Type": "application/json" },
+    authFetch("/api/v1/leads/", {
+        method: "POST",
         body: JSON.stringify({
-            first_name: first_name,
-            last_name: last_name,
-            phone: phone,
-            email: email,
+            first_name,
+            last_name,
+            phone,
+            email,
             status: leadStatus,
-            source: leadSource
-            
+            source: leadSource,
         })
     })
-    
     .then(res => {
         if (!res.ok) {
             return res.json().then(err => {
@@ -303,10 +273,9 @@ function saveLead() {
     })
     .then(() => {
         showToast("Lead saved!", "success");
-
         const modalEl = document.getElementById("addLeadModal");
         const modal = bootstrap.Modal.getInstance(modalEl);
-        modal.hide();
+        modal?.hide();
         loadLeads();
     })
     .catch(err => {
@@ -314,104 +283,112 @@ function saveLead() {
         showToast("Save failed", "error");
     })
     .finally(() => hideLoader());
-
 }
 
 
+// ===============================
+// 📤 EXPORT CSV
+// — Uses backend endpoint, not frontend memory
+// — Respects business isolation automatically
+// ===============================
+function exportCSV() {
+    const token =
+        localStorage.getItem("token") ||
+        sessionStorage.getItem("token");
+
+    // Use the backend export endpoint — already business-scoped
+    fetch("/api/v1/leads/export_csv/", {
+        headers: { "Authorization": "Bearer " + token }
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("Export failed");
+        return res.blob();
+    })
+    .then(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "leads.csv";
+        a.click();
+        URL.revokeObjectURL(url);
+    })
+    .catch(() => showToast("Export failed", "error"));
+}
+
+
+// ===============================
+// 📥 IMPORT CSV
+// ===============================
+function importCSV() {
+    // Trigger file picker correctly
+    const fileInput = document.getElementById("importFile");
+    if (!fileInput) return;
+
+    fileInput.onchange = function () {
+        const file = fileInput.files[0];
+        if (!file) {
+            showToast("Please select a file", "error");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const text = e.target.result;
+            const rows = text.split("\n").filter(r => r.trim());
+            const dataRows = rows.slice(1); // skip header
+
+            const leads = dataRows.map(row => {
+                const cols = row.split(",");
+                const full_name = (cols[0] || "").trim();
+                const nameParts = full_name.split(" ");
+                return {
+                    first_name: nameParts[0] || "",
+                    last_name: nameParts.slice(1).join(" ") || "",
+                    email: (cols[1] || "").trim(),
+                    phone: (cols[2] || "").trim(),
+                    source: "meta ads",
+                    status: "new"
+                };
+            }).filter(l => l.first_name); // skip empty rows
+
+            Promise.all(
+                leads.map(lead =>
+                    authFetch("/api/v1/leads/", {
+                        method: "POST",
+                        body: JSON.stringify(lead)
+                    })
+                )
+            )
+            .then(() => {
+                showToast(`${leads.length} leads imported!`, "success");
+                loadLeads();
+            })
+            .catch(() => showToast("Import failed", "error"));
+        };
+
+        reader.readAsText(file);
+    };
+
+    fileInput.click();
+}
+
+
+// ===============================
+// ⏳ LOADER
+// ===============================
 function showLoader() {
     document.getElementById("globalLoader")?.classList.remove("d-none");
 }
-
 
 function hideLoader() {
     document.getElementById("globalLoader")?.classList.add("d-none");
 }
 
 
-
-
-
-
-function importCSV() {
-    const fileInput = document.getElementById("importFile").click();
-    const file = fileInput.files[0];
-
-    if (!file) {
-        showToast("Please select a file", "error");
-        return;
-    }
-
-    const reader = new FileReader();
-
-    reader.onload = function(e) {
-        const text = e.target.result;
-        const rows = text.split("\n");
-        const dataRows = rows.slice(1);  // skip header
-
-        const leads = dataRows.map(row => {
-            const cols = row.split(",");
-            const full_name = cols[0];
-            const nameParts = full_name.split(" ");  // split name
-
-            return {
-                first_name: nameParts[0],
-                last_name: nameParts[1],
-                email: cols[1],
-                phone: cols[2],
-                source: "meta ads",  // ✅ hardcoded since it's Meta CSV
-                status: "new"        // ✅ default status
-            };
-        });
-
-        // Now POST each lead
-        Promise.all(leads.map(lead =>
-            authFetch("/api/v1/leads/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(lead)
-            })
-        ))
-        .then(() => {
-            showToast(`${leads.length} leads imported!`, "success");
-            loadLeads();
-        })
-        .catch(() => showToast("Import failed", "error"));
-    };
-
-    reader.readAsText(file);
-}
-
-
-
-
-
-function bulkDelete() {
-    // 1. Get all checked checkboxes
-    const checked = document.querySelectorAll(".leadCheckbox:checked");
-    
-    // 2. What if none are checked?
-    if (checked.length === 0) {
-        showToast("Select the lead first", "error");
-        return;
-    }
-
-    // 3. Confirm with user
-    if (!confirm("I confirm to delete")) return;
-
-    // 4. Get IDs and soft delete each
-    // how do you loop through `checked` and get each value?
-    Promise.all(
-        Array.from(checked).map(checkbox =>
-            authFetch(`/api/v1/leads/${checkbox.value}/`, {  // ← how to get ID from checkbox?
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ is_deleted: true })
-            })
-        )
-    )
-    .then(() => {
-        showToast(`${checked.length} leads deleted`, "success");  // ← how many were deleted?
-        loadLeads();
-    })
-    .catch(() => showToast("Delete failed", "error"));
-}
+// ===============================
+// 🚀 INIT
+// ===============================
+document.addEventListener("DOMContentLoaded", function () {
+    console.log("Leads JS Loaded");
+    loadLeads();
+});
