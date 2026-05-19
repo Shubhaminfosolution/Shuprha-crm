@@ -211,10 +211,7 @@ const hour = new Date().getHours();
 const greet = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 document.getElementById("greetingText").textContent = `${greet} — here's what's happening today.`;
 
-// Sidebar toggle
-document.getElementById("sidebarToggle").addEventListener("click", () => {
-    document.getElementById("sidebar").classList.toggle("collapsed");
-});
+
 
 // Theme toggle
 const themeBtn = document.getElementById("themeToggle");
