@@ -136,6 +136,18 @@ function searchAPI(query) {
         .finally(() => hideLoader());
 }
 
+function setActiveNav() {
+    const path = window.location.pathname;
+
+    document.querySelectorAll(".nav-link").forEach(link => {
+        const href = link.getAttribute("href") || "";
+        if (href !== "#" && path.includes(href.split("/").filter(Boolean)[2])) {
+            link.classList.add("active");
+        }
+    });
+}
+
+
 
 // 🎯 RENDER
 function renderSearchResults(data) {
@@ -178,6 +190,7 @@ function hideResults() {
     const container = document.getElementById("searchResults");
     if (container) container.classList.add("d-none");
 }
+setActiveNav();
 
 
 // 🧠 CLICK OUTSIDE
