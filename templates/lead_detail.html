@@ -58,7 +58,13 @@
 
     <div class="sidebar-footer">
         <a href="/api/v1/logout/" onclick="logout()" class="nav-link" style="color: var(--red);">
-            <span class="nav-icon">🚪</span>
+            <span class="nav-icon">
+                <img
+                    src="{% static 'icons/logout.png' %}"
+                    width="18"
+                    height="18"
+                >
+            </span>
             <span>Logout</span>
         </a>
     </div>
