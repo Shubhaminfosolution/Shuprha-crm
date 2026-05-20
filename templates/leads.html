@@ -134,7 +134,7 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Source</label>
-                            <select name="leadSource" id="source" class="form-control"> 
+                            <select name="source" id="source" class="form-control"> 
                                 <option value="">All Source</option>                            
                                 <option value="manual">Manual</option>
                                 <option value="meta ads">Meta Ads</option>
@@ -145,7 +145,7 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Status</label>
-                            <select name="leadStatus" id="status" class="form-control">
+                            <select name="status" id="status" class="form-control">
                                 <option value="">All Status</option> 
                                 <option value="new">New</option>
                                 <option value="converted">Converted</option>
@@ -173,10 +173,10 @@
     <div class="card p-3 mb-4">
         <div class="filter-row">
             <div class="search-bar" style="flex:1; min-width:200px; max-width:300px;">
-                <input type="text" id="search" class="form-control" placeholder="Search name, phone, email…">
+                <input type="text" id="filterSearch" class="form-control" placeholder="Search name, phone, email…">
             </div>
 
-            <select id="leadStatus" class="form-select filter-box">
+            <select id="filterStatus" class="form-select filter-box">
                 <option value="">All Status</option>
                 <option value="new">New</option>
                 <option value="not received">Not Received</option>
@@ -188,7 +188,7 @@
                 <option value="lost">Lost</option>
             </select>
 
-            <select id="leadSource" class="form-select filter-box">
+            <select id="filterSource" class="form-select filter-box">
                 <option value="">All Sources</option>
                 <option value="meta ads">Meta Ads</option>
                 <option value="google ads">Google Ads</option>
@@ -261,9 +261,9 @@ themeBtn.addEventListener("click", () => {
 });
 
 function clearFilters() {
-    document.getElementById("search").value = "";
-    document.getElementById("status").value = "";
-    document.getElementById("source").value = "";
+    document.getElementById("filterSearch").value = "";
+    document.getElementById("filterStatus").value = "";
+    document.getElementById("filterSource").value = "";
     loadLeads();
 }
 
