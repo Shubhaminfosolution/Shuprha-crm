@@ -1,6 +1,6 @@
 from rest_framework.routers import DefaultRouter
 from django.urls import path
-from .views import LeadViewSet, dashboard_data, dashboard_page, leads_page, login_page, appointments_ui, AppointmentViewSet, logout_view, lead_detail_page, pipeline_ui
+from .views import LeadViewSet, dashboard_data, dashboard_page, leads_page, login_page, appointments_ui, AppointmentViewSet, logout_view, lead_detail_page, pipeline_ui, homepage
 
 router = DefaultRouter()
 router.register("leads", LeadViewSet, basename="leads")
@@ -15,5 +15,6 @@ urlpatterns = router.urls + [
     path("pipeline-ui/", pipeline_ui),
     path("logout/", logout_view),
     path("leads-ui/<int:id>/", lead_detail_page, name="lead_detail"),
+    path("/", homepage)
 
 ]

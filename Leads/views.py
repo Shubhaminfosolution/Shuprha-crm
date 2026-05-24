@@ -284,6 +284,11 @@ def dashboard_data(request):
 def dashboard_page(request):
     return render(request, "dashboard.html")
 
+
+
+def homepage(request):
+    return render(request, "homepage.html")
+
 def leads_page(request):
     return render(request, "leads.html")
 
