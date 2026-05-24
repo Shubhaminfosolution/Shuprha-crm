@@ -10,6 +10,7 @@ from Users.permissions import IsAdmin
 from .models import Task
 from .serializers import TaskSerializer
 from Users.models import User
+from django.utils import timezone
 
 
 class TaskViewSet(ModelViewSet):
@@ -45,21 +46,24 @@ class TaskViewSet(ModelViewSet):
     def perform_create(self, serializer):
         user = self.request.user
 
-        # Client users blocked
         if user.role == "client":
             from rest_framework.exceptions import PermissionDenied
             raise PermissionDenied("Client users cannot create tasks.")
 
         task = serializer.save(created_by=user)
 
-        # Schedule email reminder — 1 hour before due date
-        from .tasks import send_task_reminder
+
         reminder_time = task.due_date - timezone.timedelta(hours=1)
         if reminder_time > timezone.now():
-            send_task_reminder.apply_async(
-                args=[task.id],
-                eta=reminder_time
-            )
+            # Schedule via Celery if worker available, else skip
+            try:
+                from .tasks import send_task_reminder
+                send_task_reminder.apply_async(
+                    args=[task.id],
+                    eta=reminder_time
+                )
+            except Exception:
+                pass  # silently skip if no worker
 
     def perform_update(self, serializer):
         instance = self.get_object()

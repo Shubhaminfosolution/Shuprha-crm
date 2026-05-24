@@ -15,6 +15,6 @@ urlpatterns = router.urls + [
     path("pipeline-ui/", pipeline_ui),
     path("logout/", logout_view),
     path("leads-ui/<int:id>/", lead_detail_page, name="lead_detail"),
-    path("", homepage)
+
 
 ]

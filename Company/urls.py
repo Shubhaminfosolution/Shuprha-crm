@@ -21,7 +21,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 from Leads.views import EmailTokenView
-from Tasks import urls
+from Leads.views import homepage
 
 
 urlpatterns = [
@@ -35,5 +35,6 @@ urlpatterns = [
     path("api/v1/", include("Activities.urls")),
     path("api/v1/", include("Ads.urls")),
     path("api/v1/", include("Tasks.urls")),
-    path("", urls.homepage)
+    path("", homepage, name="home")
+    
 ]
