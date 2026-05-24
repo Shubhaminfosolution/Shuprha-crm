@@ -287,7 +287,7 @@ def dashboard_page(request):
 
 
 def homepage(request):
-    return render(request, "homepage.html")
+    return render(request, "Homepage.html")
 
 def leads_page(request):
     return render(request, "leads.html")
