@@ -17,6 +17,7 @@ import dj_database_url
 from django.db import connection
 from celery import Celery
 from datetime import timedelta
+from celery.schedules import crontab
 
 
 load_dotenv()
@@ -56,8 +57,10 @@ INSTALLED_APPS = [
     'Activities',
     'import_export',
     'Ads',
+    'Tasks',
     'corsheaders',
     'encrypted_model_fields',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -222,3 +225,15 @@ DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "shubhammore0512@gmail.com"
 
 
 
+
+
+
+
+ 
+CELERY_BEAT_SCHEDULE = {
+    "mark-overdue-tasks": {
+        "task": "Tasks.tasks.mark_overdue_tasks",
+        "schedule": crontab(minute="*/30"),  # every 30 minutes
+    },
+}
+ 
