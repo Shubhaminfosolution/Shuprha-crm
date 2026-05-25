@@ -179,13 +179,14 @@ function loadDashboard(days = 7) {
 function saveTask() {
     const title = document.getElementById("taskTitle").value.trim();
     const priority = document.getElementById("taskPriority").value;
-    const assigned_to = document.getElementById("taskAssignee").value;
+    const assigned_to = document.getElementById("taskAssignee")?.value;
     const due_date = document.getElementById("taskDueDate").value;
 
     if (!title) { showToast("Title is required", "error"); return; }
     if (!due_date) { showToast("Due date is required", "error"); return; }
 
-    // assigned_to must resolve — use select value, fallback to currentUserId
+    const assigneeId = assigned_to || currentUserId;
+    if (!assigneeId) { showToast("Please select an assignee", "error"); return; }
 
     authFetch("/api/v1/tasks/", {
         method: "POST",
@@ -196,13 +197,23 @@ function saveTask() {
             due_date: new Date(due_date).toISOString(),
         })
     })
-
-
-
-
-
+    .then(r => {
+        if (!r.ok) return r.json().then(e => { throw e; });
+        return r.json();
+    })
+    .then(() => {
+        showToast("Task added!", "success");
+        document.getElementById("taskTitle").value = "";
+        document.getElementById("taskDueDate").value = "";
+        toggleAddTask();
+        loadTasks();
+        loadProductivity();
+    })
+    .catch(err => {
+        console.error(err);
+        showToast("Failed to save task", "error");
+    });
 }
-
 
 
 
