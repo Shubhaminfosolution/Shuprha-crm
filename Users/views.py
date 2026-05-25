@@ -16,5 +16,4 @@ class UserViewSet(ModelViewSet):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def me(request):
-    from .serializers import UserSerializer
     return Response(UserSerializer(request.user).data)
