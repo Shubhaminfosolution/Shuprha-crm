@@ -186,11 +186,6 @@ function saveTask() {
     if (!due_date) { showToast("Due date is required", "error"); return; }
 
     // assigned_to must resolve — use select value, fallback to currentUserId
-    const assigneeId = assigned_to || currentUserId;
-    if (!assigneeId) {
-        showToast("Please select an assignee", "error");
-        return;
-    }
 
     authFetch("/api/v1/tasks/", {
         method: "POST",
