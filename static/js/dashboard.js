@@ -198,7 +198,7 @@ function saveTask() {
             title,
             priority,
             assigned_to: parseInt(assigneeId),
-            due_date: new Date(due_date).toISOString()
+            due_date: new Date(due_date).toISOString(),
         })
     })
 
