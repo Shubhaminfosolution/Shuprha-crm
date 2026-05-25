@@ -10,6 +10,100 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* ── TASK WIDGET ── */
+        .task-widget { margin-bottom: 24px; }
+
+        .task-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+        .task-tab {
+            padding: 6px 16px; border-radius: 20px; font-size: 12px;
+            font-weight: 500; cursor: pointer; border: 1px solid var(--border, #e5e7eb);
+            background: transparent; color: var(--text-2, #6b7280);
+            transition: all .2s;
+        }
+        .task-tab.active { background: var(--blue, #3b82f6); color: #fff; border-color: transparent; }
+
+        .task-list { display: flex; flex-direction: column; gap: 10px; max-height: 320px; overflow-y: auto; }
+
+        .task-item {
+            display: flex; align-items: flex-start; gap: 12px;
+            padding: 12px 14px; border-radius: 10px;
+            background: var(--bg-2, #f9fafb);
+            border-left: 3px solid transparent;
+            transition: background .2s;
+        }
+        .task-item:hover { background: var(--bg-3, #f3f4f6); }
+        .task-item.overdue { border-left-color: #ef4444; }
+        .task-item.urgent  { border-left-color: #f97316; }
+        .task-item.high    { border-left-color: #eab308; }
+        .task-item.medium  { border-left-color: #3b82f6; }
+        .task-item.low     { border-left-color: #10b981; }
+        .task-item.completed { opacity: .5; }
+
+        .task-check {
+            width: 18px; height: 18px; border-radius: 50%;
+            border: 2px solid var(--border, #d1d5db);
+            cursor: pointer; flex-shrink: 0; margin-top: 2px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all .2s;
+        }
+        .task-check:hover { border-color: #3b82f6; }
+        .task-check.done { background: #10b981; border-color: #10b981; color: #fff; font-size: 10px; }
+
+        .task-body { flex: 1; min-width: 0; }
+        .task-title { font-size: 13px; font-weight: 500; color: var(--text-1, #111827); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .task-title.done-text { text-decoration: line-through; color: var(--text-3, #9ca3af); }
+        .task-meta { display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
+        .task-due { font-size: 11px; color: var(--text-3, #9ca3af); }
+        .task-due.overdue-text { color: #ef4444; font-weight: 500; }
+        .task-assignee { font-size: 11px; color: var(--text-3, #9ca3af); }
+
+        .priority-dot {
+            width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 6px;
+        }
+        .dot-urgent { background: #ef4444; }
+        .dot-high   { background: #f97316; }
+        .dot-medium { background: #3b82f6; }
+        .dot-low    { background: #10b981; }
+
+        .task-empty { color: var(--text-3, #9ca3af); font-size: 13px; padding: 20px 0; text-align: center; }
+
+        /* Add task form */
+        .add-task-form {
+            display: none; gap: 8px; margin-top: 14px; flex-wrap: wrap; align-items: flex-end;
+        }
+        .add-task-form.open { display: flex; }
+        .add-task-form input, .add-task-form select {
+            font-size: 13px; padding: 7px 10px; border-radius: 8px;
+            border: 1px solid var(--border, #e5e7eb);
+            background: var(--bg, #fff); color: var(--text-1, #111827);
+        }
+        .add-task-form input[type="text"] { flex: 1; min-width: 160px; }
+        .add-task-form input[type="datetime-local"] { width: 190px; }
+        .btn-add-task {
+            padding: 7px 16px; background: var(--blue, #3b82f6); color: #fff;
+            border: none; border-radius: 8px; font-size: 13px; cursor: pointer;
+        }
+        .btn-add-task:hover { opacity: .88; }
+        .btn-cancel-task {
+            padding: 7px 12px; background: transparent; color: var(--text-2, #6b7280);
+            border: 1px solid var(--border, #e5e7eb); border-radius: 8px; font-size: 13px; cursor: pointer;
+        }
+
+        /* Productivity strip */
+        .productivity-strip {
+            display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap;
+        }
+        .prod-box {
+            flex: 1; min-width: 120px; padding: 12px 16px;
+            background: var(--bg-2, #f9fafb); border-radius: 10px; text-align: center;
+        }
+        .prod-label { font-size: 11px; color: var(--text-3, #9ca3af); margin-bottom: 4px; }
+        .prod-value { font-size: 20px; font-weight: 700; color: var(--text-1, #111827); }
+        .prod-value.green { color: #10b981; }
+        .prod-value.red   { color: #ef4444; }
+        .prod-value.blue  { color: #3b82f6; }
+    </style>
 </head>
 
 <body>
@@ -20,117 +114,43 @@
 <div id="toastContainer" class="toast-container"></div>
 
 <!-- SIDEBAR -->
-<!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
-
-    <!-- HEADER -->
     <div class="sidebar-header">
-
         <div class="logo-text">
             <span class="logo-dot"></span>
             <span class="logo-name">CRM</span>
         </div>
-
-        <button class="toggle-btn" id="sidebarToggle">
-            ☰
-        </button>
-
+        <button class="toggle-btn" id="sidebarToggle">☰</button>
     </div>
-
-    <!-- NAVIGATION -->
     <nav>
-
-        <div class="nav-section-label">
-            Menu
-        </div>
-
-        <!-- DASHBOARD -->
+        <div class="nav-section-label">Menu</div>
         <a href="/api/v1/dashboard-ui/" class="nav-link">
-            <span class="nav-icon">
-                <img src="{% static 'icons/system-regular-10-analytics-hover-analytics.png' %}" width="18" height="18">
-            </span>
+            <span class="nav-icon"><img src="{% static 'icons/system-regular-10-analytics-hover-analytics.png' %}" width="18" height="18"></span>
             <span class="nav-label">Dashboard</span>
         </a>
-
-        <!-- LEADS -->
         <a href="/api/v1/leads-ui/" class="nav-link">
-
-            <span class="nav-icon">
-                <img
-                    src="{% static 'icons/lead-generation.png' %}"
-                    width="18"
-                    height="18"
-                >
-            </span>
-
-            <span class="nav-label">
-                Leads
-            </span>
-
+            <span class="nav-icon"><img src="{% static 'icons/lead-generation.png' %}" width="18" height="18"></span>
+            <span class="nav-label">Leads</span>
         </a>
-
-        <!-- APPOINTMENTS -->
         <a href="/api/v1/appointments-ui/" class="nav-link">
-
-            <span class="nav-icon">
-                <img
-                    src="{% static 'icons/calendar.png' %}"
-                    width="18"
-                    height="18"
-                >
-            </span>
-
-            <span class="nav-label">
-                Appointments
-            </span>
-
+            <span class="nav-icon"><img src="{% static 'icons/calendar.png' %}" width="18" height="18"></span>
+            <span class="nav-label">Appointments</span>
         </a>
-
-        <!-- PIPELINE -->
         <a href="/api/v1/pipeline-ui/" class="nav-link">
-
-            <span class="nav-icon">
-                <img
-                    src="{% static 'icons/scrum.png' %}"
-                    width="18"
-                    height="18"
-                >
-            </span>
-
-            <span class="nav-label">
-                Pipeline
-            </span>
-
+            <span class="nav-icon"><img src="{% static 'icons/scrum.png' %}" width="18" height="18"></span>
+            <span class="nav-label">Pipeline</span>
         </a>
-
+        <a href="/api/v1/tasks-ui/" class="nav-link">
+            <span class="nav-icon">✅</span>
+            <span class="nav-label">Tasks</span>
+        </a>
     </nav>
-
-    <!-- FOOTER -->
     <div class="sidebar-footer">
-
-        <a
-            href="/api/v1/logout/"
-            onclick="logout()"
-            class="nav-link"
-            style="color: var(--red);"
-        >
-
-            <span class="nav-icon">
-                <img
-                    src="{% static 'icons/logout.png' %}"
-                    width="18"
-                    height="18"
-                >
-            </span>
-
-            <span class="nav-label">
-                Logout
-            </span>
-
+        <a href="/api/v1/logout/" onclick="logout()" class="nav-link" style="color: var(--red);">
+            <span class="nav-icon"><img src="{% static 'icons/logout.png' %}" width="18" height="18"></span>
+            <span class="nav-label">Logout</span>
         </a>
-
     </div>
-
 </aside>
 
 <!-- MAIN -->
@@ -198,13 +218,75 @@
             <div class="metric-label">Stale Leads</div>
             <div class="metric-value" id="stale_leads" style="color:var(--red)">—</div>
         </div>
-
-    
     </div>
-        <!-- TODAY'S PRIORITY WIDGET -->
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px;">
 
-        <!-- LEFT — Today's Appointments -->
+    <!-- ── TASK WIDGET ── -->
+    <div class="card p-4 task-widget">
+        <div class="chart-header" style="margin-bottom:12px;">
+            <div class="chart-title">✅ My Tasks</div>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <span class="badge badge-new" id="taskPendingCount">0 pending</span>
+                <button class="btn-add-task" onclick="toggleAddTask()">+ Add Task</button>
+            </div>
+        </div>
+
+        <!-- Tabs: My Tasks / Team (admin only) -->
+        <div class="task-tabs">
+            <button class="task-tab active" onclick="switchTab('mine', this)">My Tasks</button>
+            <button class="task-tab" onclick="switchTab('team', this)" id="teamTabBtn" style="display:none;">Team View</button>
+        </div>
+
+        <!-- Task list -->
+        <div class="task-list" id="taskList">
+            <div class="task-empty">Loading tasks...</div>
+        </div>
+
+        <!-- Productivity strip -->
+        <div class="productivity-strip" id="productivityStrip">
+            <div class="prod-box">
+                <div class="prod-label">Total Assigned</div>
+                <div class="prod-value blue" id="prodTotal">—</div>
+            </div>
+            <div class="prod-box">
+                <div class="prod-label">Completed</div>
+                <div class="prod-value green" id="prodCompleted">—</div>
+            </div>
+            <div class="prod-box">
+                <div class="prod-label">Overdue</div>
+                <div class="prod-value red" id="prodOverdue">—</div>
+            </div>
+            <div class="prod-box">
+                <div class="prod-label">Completion Rate</div>
+                <div class="prod-value" id="prodRate">—</div>
+            </div>
+            <div class="prod-box">
+                <div class="prod-label">On-Time Rate</div>
+                <div class="prod-value" id="prodOnTime">—</div>
+            </div>
+            <div class="prod-box">
+                <div class="prod-label">Productivity Score</div>
+                <div class="prod-value" id="prodScore">—</div>
+            </div>
+        </div>
+
+        <!-- Add task form -->
+        <div class="add-task-form" id="addTaskForm">
+            <input type="text" id="taskTitle" placeholder="Task title..." />
+            <select id="taskPriority">
+                <option value="low">Low</option>
+                <option value="medium" selected>Medium</option>
+                <option value="high">High</option>
+                <option value="urgent">Urgent</option>
+            </select>
+            <select id="taskAssignee"></select>
+            <input type="datetime-local" id="taskDueDate" />
+            <button class="btn-add-task" onclick="saveTask()">Save</button>
+            <button class="btn-cancel-task" onclick="toggleAddTask()">Cancel</button>
+        </div>
+    </div>
+
+    <!-- TODAY'S PRIORITY WIDGET -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px;">
         <div class="card p-4">
             <div class="chart-header">
                 <div class="chart-title">📅 Today's Appointments</div>
@@ -214,8 +296,6 @@
                 <div style="color:var(--text-3); font-size:13px;">No appointments today</div>
             </div>
         </div>
-
-        <!-- RIGHT — Today's Follow-ups -->
         <div class="card p-4">
             <div class="chart-header">
                 <div class="chart-title">🔄 Today's Follow-ups</div>
@@ -225,7 +305,6 @@
                 <div style="color:var(--text-3); font-size:13px;">No follow-ups today</div>
             </div>
         </div>
-
     </div>
 
     <!-- CHARTS -->
@@ -274,14 +353,12 @@
 <script src="{% static 'js/dashboard.js' %}"></script>
 
 <script>
-// Greeting
+// ── GREETING ──
 const hour = new Date().getHours();
 const greet = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 document.getElementById("greetingText").textContent = `${greet} — here's what's happening today.`;
 
-
-
-// Theme toggle
+// ── THEME ──
 const themeBtn = document.getElementById("themeToggle");
 const saved = localStorage.getItem("theme") || "light";
 if (saved === "dark") { document.documentElement.setAttribute("data-theme", "dark"); themeBtn.textContent = "☀️"; }
@@ -291,6 +368,245 @@ themeBtn.addEventListener("click", () => {
     themeBtn.textContent = isDark ? "🌙" : "☀️";
     localStorage.setItem("theme", isDark ? "light" : "dark");
 });
+
+// ── AUTH ──
+function getToken() {
+    return localStorage.getItem("token") || sessionStorage.getItem("token");
+}
+function authFetch(url, options = {}) {
+    return fetch(url, {
+        ...options,
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + getToken(),
+            ...(options.headers || {})
+        }
+    });
+}
+
+// ── TASK STATE ──
+let currentTab = "mine";
+let allUsers = [];
+let currentUserRole = "";
+let currentUserId = null;
+
+// ── INIT TASKS ──
+document.addEventListener("DOMContentLoaded", () => {
+    loadUserInfo();
+});
+
+function loadUserInfo() {
+    authFetch("/api/v1/users/me/")
+        .then(r => r.json())
+        .then(user => {
+            currentUserRole = user.role;
+            currentUserId = user.id;
+
+            // Show team tab only for admin/manager
+            if (["admin", "manager"].includes(user.role)) {
+                document.getElementById("teamTabBtn").style.display = "inline-block";
+            }
+
+            loadUsers();
+            loadTasks();
+            loadProductivity();
+        })
+        .catch(() => {
+            // fallback — still load tasks
+            loadTasks();
+            loadProductivity();
+        });
+}
+
+function loadUsers() {
+    authFetch("/api/v1/users/")
+        .then(r => r.json())
+        .then(data => {
+            allUsers = data.results || data;
+            const sel = document.getElementById("taskAssignee");
+            sel.innerHTML = allUsers
+                .filter(u => ["admin","manager","sales"].includes(u.role))
+                .map(u => `<option value="${u.id}">${u.full_name}</option>`)
+                .join("");
+        })
+        .catch(() => {});
+}
+
+// ── LOAD TASKS ──
+function loadTasks() {
+    const url = currentTab === "mine"
+        ? "/api/v1/tasks/my_tasks/"
+        : "/api/v1/tasks/";
+
+    authFetch(url)
+        .then(r => r.json())
+        .then(data => {
+            const tasks = data.results || data;
+            renderTasks(tasks);
+        })
+        .catch(() => {
+            document.getElementById("taskList").innerHTML =
+                '<div class="task-empty">Failed to load tasks</div>';
+        });
+}
+
+// ── RENDER TASKS ──
+function renderTasks(tasks) {
+    const list = document.getElementById("taskList");
+    const pendingBadge = document.getElementById("taskPendingCount");
+
+    if (!tasks || tasks.length === 0) {
+        list.innerHTML = '<div class="task-empty">No tasks yet — add one above ✨</div>';
+        pendingBadge.textContent = "0 pending";
+        return;
+    }
+
+    const pending = tasks.filter(t => t.status !== "completed").length;
+    pendingBadge.textContent = `${pending} pending`;
+
+    list.innerHTML = tasks.map(task => {
+        const isOverdue = task.is_overdue;
+        const isDone = task.status === "completed";
+        const priorityClass = isOverdue ? "overdue" : task.priority;
+        const dotClass = `dot-${task.priority}`;
+        const dueDate = task.due_date
+            ? new Date(task.due_date).toLocaleDateString("en-IN", { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" })
+            : "";
+        const dueClass = isOverdue ? "task-due overdue-text" : "task-due";
+        const checkClass = isDone ? "task-check done" : "task-check";
+        const checkIcon = isDone ? "✓" : "";
+        const titleClass = isDone ? "task-title done-text" : "task-title";
+
+        return `
+        <div class="task-item ${priorityClass} ${isDone ? 'completed' : ''}" id="task-${task.id}">
+            <div class="${checkClass}" onclick="toggleTask(${task.id}, ${isDone})">${checkIcon}</div>
+            <div class="priority-dot ${dotClass}"></div>
+            <div class="task-body">
+                <div class="${titleClass}">${task.title}</div>
+                <div class="task-meta">
+                    <span class="${dueClass}">📅 ${dueDate}</span>
+                    ${task.assigned_to_name ? `<span class="task-assignee">→ ${task.assigned_to_name}</span>` : ""}
+                    <span class="task-due" style="text-transform:capitalize;">${isOverdue ? "⚠️ Overdue" : task.status}</span>
+                </div>
+            </div>
+            ${canDelete(task) ? `<span style="cursor:pointer;font-size:12px;color:var(--text-3);margin-left:auto;" onclick="deleteTask(${task.id})">✕</span>` : ""}
+        </div>`;
+    }).join("");
+}
+
+function canDelete(task) {
+    return currentUserRole === "admin" || task.created_by === currentUserId;
+}
+
+// ── TOGGLE COMPLETE ──
+function toggleTask(id, isDone) {
+    if (isDone) return; // already done
+    authFetch(`/api/v1/tasks/${id}/`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: "completed" })
+    })
+    .then(r => r.json())
+    .then(() => {
+        loadTasks();
+        loadProductivity();
+    })
+    .catch(() => showToast("Failed to update task", "error"));
+}
+
+// ── DELETE TASK ──
+function deleteTask(id) {
+    if (!confirm("Delete this task?")) return;
+    authFetch(`/api/v1/tasks/${id}/`, { method: "DELETE" })
+        .then(() => {
+            loadTasks();
+            loadProductivity();
+        })
+        .catch(() => showToast("Delete failed", "error"));
+}
+
+// ── SAVE TASK ──
+function saveTask() {
+    const title = document.getElementById("taskTitle").value.trim();
+    const priority = document.getElementById("taskPriority").value;
+    const assigned_to = document.getElementById("taskAssignee").value;
+    const due_date = document.getElementById("taskDueDate").value;
+
+    if (!title) { showToast("Title is required", "error"); return; }
+    if (!due_date) { showToast("Due date is required", "error"); return; }
+
+    authFetch("/api/v1/tasks/", {
+        method: "POST",
+        body: JSON.stringify({
+            title,
+            priority,
+            assigned_to: assigned_to || currentUserId,
+            due_date: new Date(due_date).toISOString()
+        })
+    })
+    .then(r => {
+        if (!r.ok) return r.json().then(e => { throw e; });
+        return r.json();
+    })
+    .then(() => {
+        showToast("Task added!", "success");
+        document.getElementById("taskTitle").value = "";
+        document.getElementById("taskDueDate").value = "";
+        toggleAddTask();
+        loadTasks();
+        loadProductivity();
+    })
+    .catch(err => {
+        console.error(err);
+        showToast("Failed to save task", "error");
+    });
+}
+
+// ── PRODUCTIVITY ──
+function loadProductivity() {
+    authFetch("/api/v1/tasks/productivity/")
+        .then(r => r.json())
+        .then(data => {
+            const me = data.report?.find(r => r.user_id === currentUserId) || data.report?.[0];
+            if (!me) return;
+            document.getElementById("prodTotal").textContent     = me.total_tasks;
+            document.getElementById("prodCompleted").textContent = me.completed;
+            document.getElementById("prodOverdue").textContent   = me.overdue;
+            document.getElementById("prodRate").textContent      = me.completion_rate + "%";
+            document.getElementById("prodOnTime").textContent    = me.on_time_rate + "%";
+            document.getElementById("prodScore").textContent     = me.productivity_score + "%";
+
+            // Colour the score
+            const scoreEl = document.getElementById("prodScore");
+            const score = me.productivity_score;
+            scoreEl.className = "prod-value " + (score >= 75 ? "green" : score >= 40 ? "blue" : "red");
+        })
+        .catch(() => {});
+}
+
+// ── TABS ──
+function switchTab(tab, btn) {
+    currentTab = tab;
+    document.querySelectorAll(".task-tab").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    loadTasks();
+}
+
+// ── TOGGLE ADD FORM ──
+function toggleAddTask() {
+    const form = document.getElementById("addTaskForm");
+    form.classList.toggle("open");
+}
+
+// ── TOAST helper (fallback if main.js doesn't have it) ──
+function showToast(msg, type) {
+    const container = document.getElementById("toastContainer");
+    if (!container) return;
+    const t = document.createElement("div");
+    t.className = `toast toast-${type}`;
+    t.textContent = msg;
+    container.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+}
 </script>
 
 </body>

@@ -10,3 +10,9 @@ class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, IsAdmin] 
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def me(request):
+    from .serializers import UserSerializer
+    return Response(UserSerializer(request.user).data)
