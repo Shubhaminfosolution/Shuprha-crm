@@ -6,4 +6,4 @@ class ActivitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Activity
         fields = "__all__"
-        read_only_fields = ("performed_by", "created_at", "updated_at")
+        read_only_fields = ("performed_by", "created_at", "updated_at", "lead") 
