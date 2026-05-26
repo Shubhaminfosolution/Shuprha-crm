@@ -80,6 +80,10 @@ document.addEventListener("DOMContentLoaded", () => {
     loadTimeline();
     document.getElementById("addActivityBtn")
         ?.addEventListener("click", toggleActivityForm);
+    document.getElementById("saveActivityBtn")
+        ?.addEventListener("click", saveActivity);
+    document.getElementById("cancelActivityBtn")
+        ?.addEventListener("click", toggleActivityForm);
 });
 
 
