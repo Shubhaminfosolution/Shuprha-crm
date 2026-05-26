@@ -61,118 +61,6 @@ function authFetch(url, options = {}) {
 // ===============================
 // 🕐 LOAD TIMELINE
 // ===============================
-function loadTimeline() {
-    const leadId = getLeadId();
-
-    authFetch(`/api/v1/leads/${leadId}/timeline/`)
-        .then(r => r.json())
-        .then(activities => {
-            const container = document.getElementById("activityTimeline");
-
-            if (!activities || activities.length === 0) {
-                container.innerHTML = `<div style="color:var(--text-3); font-size:13px; padding:12px 0 12px 24px;">No activity yet.</div>`;
-                return;
-            }
-
-            const iconMap = {
-                call:     "📞",
-                email:    "📧",
-                whatsapp: "💬",
-                meeting:  "🤝",
-                note:     "📝",
-                followup: "🔄",
-            };
-
-            container.innerHTML = activities.map(act => {
-                const icon = iconMap[act.activity_type] || "📌";
-                const date = act.scheduled_at
-                    ? new Date(act.scheduled_at).toLocaleDateString("en-IN", {
-                        day: "numeric", month: "short",
-                        hour: "2-digit", minute: "2-digit"
-                      })
-                    : new Date(act.created_at).toLocaleDateString("en-IN", {
-                        day: "numeric", month: "short",
-                        hour: "2-digit", minute: "2-digit"
-                      });
-
-                return `
-                <div style="display:flex; gap:12px; margin-bottom:16px; align-items:flex-start;">
-                    <div style="width:32px; height:32px; border-radius:50%; background:var(--bg-2,#f3f4f6);
-                        display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0;">
-                        ${icon}
-                    </div>
-                    <div style="flex:1;">
-                        <div style="font-size:13px; font-weight:500; color:var(--text-1,#111); text-transform:capitalize;">
-                            ${act.activity_type.replace("_", " ")}
-                            ${act.completed ? '<span style="color:#10b981; font-size:11px; margin-left:6px;">✓ Done</span>' : ""}
-                        </div>
-                        <div style="font-size:12px; color:var(--text-3,#9ca3af); margin-top:2px;">${date}</div>
-                        ${act.notes ? `<div style="font-size:13px; color:var(--text-2,#6b7280); margin-top:4px;">${act.notes}</div>` : ""}
-                        ${act.performed_by_name || act.performed_by ? `<div style="font-size:11px; color:var(--text-3,#9ca3af); margin-top:4px;">by ${act.performed_by_name || act.performed_by}</div>` : ""}
-                    </div>
-                </div>`;
-            }).join("");
-        })
-        .catch(() => {
-            document.getElementById("activityTimeline").innerHTML =
-                `<div style="color:var(--text-3); font-size:13px; padding:12px 0 12px 24px;">Failed to load activities.</div>`;
-        });
-}
-
-
-// ===============================
-// ➕ TOGGLE ACTIVITY FORM
-// ===============================
-function toggleActivityForm() {
-    const form = document.getElementById("activityForm");
-    form.style.display = form.style.display === "none" ? "block" : "none";
-}
-
-
-// ===============================
-// 💾 SAVE ACTIVITY
-// ===============================
-function saveActivity() {
-    const leadId = getLeadId();
-    const activity_type = document.getElementById("activityType").value;
-    const notes = document.getElementById("activityNotes").value.trim();
-    const scheduled_at = document.getElementById("activityScheduled").value;
-
-    if (!notes) { showToast("Notes are required", "error"); return; }
-
-    authFetch(`/api/v1/leads/${leadId}/add_activity/`, {
-        method: "POST",
-        body: JSON.stringify({
-            activity_type,
-            notes,
-            scheduled_at: scheduled_at
-                ? new Date(scheduled_at).toISOString()
-                : null,
-            completed: false
-        })
-    })
-    .then(r => {
-        if (!r.ok) return r.json().then(e => { throw e; });
-        return r.json();
-    })
-    .then(() => {
-        showToast("Activity added!", "success");
-        document.getElementById("activityNotes").value = "";
-        document.getElementById("activityScheduled").value = "";
-        toggleActivityForm();
-        loadTimeline(); // reload timeline after save
-    })
-    .catch(err => {
-        console.error(err);
-        showToast("Failed to save activity", "error");
-    });
-}
-// ===============================
-// 🔔 TOAST (SAFE FALLBACK)
-// ===============================
-function showToast(message, type = "info") {
-    console.log(`[${type}]`, message);
-}
 
 
 // ===============================
@@ -189,7 +77,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("saveBtn").addEventListener("click", saveAppointment);
     attachStatusListener(); 
     loadLead(leadId);
-
     loadTimeline();
 });
 
@@ -459,6 +346,118 @@ function deleteAppointment(id){
 
 
 
+function loadTimeline() {
+    const leadId = getLeadId();
+
+    authFetch(`/api/v1/leads/${leadId}/timeline/`)
+        .then(r => r.json())
+        .then(activities => {
+            const container = document.getElementById("activityTimeline");
+
+            if (!activities || activities.length === 0) {
+                container.innerHTML = `<div style="color:var(--text-3); font-size:13px; padding:12px 0 12px 24px;">No activity yet.</div>`;
+                return;
+            }
+
+            const iconMap = {
+                call:     "📞",
+                email:    "📧",
+                whatsapp: "💬",
+                meeting:  "🤝",
+                note:     "📝",
+                followup: "🔄",
+            };
+
+            container.innerHTML = activities.map(act => {
+                const icon = iconMap[act.activity_type] || "📌";
+                const date = act.scheduled_at
+                    ? new Date(act.scheduled_at).toLocaleDateString("en-IN", {
+                        day: "numeric", month: "short",
+                        hour: "2-digit", minute: "2-digit"
+                      })
+                    : new Date(act.created_at).toLocaleDateString("en-IN", {
+                        day: "numeric", month: "short",
+                        hour: "2-digit", minute: "2-digit"
+                      });
+
+                return `
+                <div style="display:flex; gap:12px; margin-bottom:16px; align-items:flex-start;">
+                    <div style="width:32px; height:32px; border-radius:50%; background:var(--bg-2,#f3f4f6);
+                        display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0;">
+                        ${icon}
+                    </div>
+                    <div style="flex:1;">
+                        <div style="font-size:13px; font-weight:500; color:var(--text-1,#111); text-transform:capitalize;">
+                            ${act.activity_type.replace("_", " ")}
+                            ${act.completed ? '<span style="color:#10b981; font-size:11px; margin-left:6px;">✓ Done</span>' : ""}
+                        </div>
+                        <div style="font-size:12px; color:var(--text-3,#9ca3af); margin-top:2px;">${date}</div>
+                        ${act.notes ? `<div style="font-size:13px; color:var(--text-2,#6b7280); margin-top:4px;">${act.notes}</div>` : ""}
+                        ${act.performed_by_name || act.performed_by ? `<div style="font-size:11px; color:var(--text-3,#9ca3af); margin-top:4px;">by ${act.performed_by_name || act.performed_by}</div>` : ""}
+                    </div>
+                </div>`;
+            }).join("");
+        })
+        .catch(() => {
+            document.getElementById("activityTimeline").innerHTML =
+                `<div style="color:var(--text-3); font-size:13px; padding:12px 0 12px 24px;">Failed to load activities.</div>`;
+        });
+}
+
+
+// ===============================
+// ➕ TOGGLE ACTIVITY FORM
+// ===============================
+function toggleActivityForm() {
+    const form = document.getElementById("activityForm");
+    form.style.display = form.style.display === "none" ? "block" : "none";
+}
+
+
+// ===============================
+// 💾 SAVE ACTIVITY
+// ===============================
+function saveActivity() {
+    const leadId = getLeadId();
+    const activity_type = document.getElementById("activityType").value;
+    const notes = document.getElementById("activityNotes").value.trim();
+    const scheduled_at = document.getElementById("activityScheduled").value;
+
+    if (!notes) { showToast("Notes are required", "error"); return; }
+
+    authFetch(`/api/v1/leads/${leadId}/add_activity/`, {
+        method: "POST",
+        body: JSON.stringify({
+            activity_type,
+            notes,
+            scheduled_at: scheduled_at
+                ? new Date(scheduled_at).toISOString()
+                : null,
+            completed: false
+        })
+    })
+    .then(r => {
+        if (!r.ok) return r.json().then(e => { throw e; });
+        return r.json();
+    })
+    .then(() => {
+        showToast("Activity added!", "success");
+        document.getElementById("activityNotes").value = "";
+        document.getElementById("activityScheduled").value = "";
+        toggleActivityForm();
+        loadTimeline(); // reload timeline after save
+    })
+    .catch(err => {
+        console.error(err);
+        showToast("Failed to save activity", "error");
+    });
+}
+// ===============================
+// 🔔 TOAST (SAFE FALLBACK)
+// ===============================
+function showToast(message, type = "info") {
+    console.log(`[${type}]`, message);
+}
 
 
 
