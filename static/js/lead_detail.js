@@ -66,26 +66,6 @@ function authFetch(url, options = {}) {
 // ===============================
 // 🚀 INIT
 // ===============================
-document.addEventListener("DOMContentLoaded", () => {
-
-    const leadId = getLeadId();
-
-    if (!leadId) {
-        console.error("Invalid Lead ID");
-        return;
-    }
-    document.getElementById("saveBtn").addEventListener("click", saveAppointment);
-    attachStatusListener(); 
-    loadLead(leadId);
-    loadTimeline();
-    document.getElementById("addActivityBtn")
-        ?.addEventListener("click", toggleActivityForm);
-    document.getElementById("saveActivityBtn")
-        ?.addEventListener("click", saveActivity);
-    document.getElementById("cancelActivityBtn")
-        ?.addEventListener("click", toggleActivityForm);
-});
-
 
 
 // ===============================
@@ -476,3 +456,24 @@ function showToast(message, type = "info") {
 function closeModal(){
     document.getElementById("appointmentModal").style.display = "none";
 }
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    const leadId = getLeadId();
+    if (!leadId) {
+        console.error("Invalid Lead ID");
+        return;
+    }
+    document.getElementById("saveBtn").addEventListener("click", saveAppointment);
+    attachStatusListener(); 
+    loadLead(leadId);
+    loadTimeline();
+    document.getElementById("addActivityBtn")
+        ?.addEventListener("click", toggleActivityForm);
+    document.getElementById("saveActivityBtn")
+        ?.addEventListener("click", saveActivity);
+    document.getElementById("cancelActivityBtn")
+        ?.addEventListener("click", toggleActivityForm);
+});
+
+
