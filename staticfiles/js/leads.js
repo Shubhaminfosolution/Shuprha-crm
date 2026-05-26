@@ -216,6 +216,23 @@ document.getElementById("filterStatus")?.addEventListener("change", loadLeads);
 document.getElementById("filterSource")?.addEventListener("change", loadLeads);
 
 
+
+document.addEventListener("change", function(e) {
+    if (e.target.id === "selectAll") {
+        const checkboxes = document.querySelectorAll(".leadCheckbox");
+        checkboxes.forEach(cb => cb.checked = e.target.checked);
+    }
+});
+
+
+document.addEventListener("change", function(e) {
+    if (e.target.classList.contains("leadCheckbox")) {
+        const all = document.querySelectorAll(".leadCheckbox");
+        const allChecked = Array.from(all).every(cb => cb.checked);
+        document.getElementById("selectAll").checked = allChecked;
+    }
+});
+
 // ===============================
 // ⏳ DEBOUNCE
 // ===============================
@@ -313,6 +330,15 @@ function exportCSV() {
         URL.revokeObjectURL(url);
     })
     .catch(() => showToast("Export failed", "error"));
+}
+
+
+const sidebarToggle = document.getElementById("sidebarToggle");
+const sidebar = document.getElementById("sidebar");
+if (sidebarToggle && sidebar) {
+    sidebarToggle.addEventListener("click", () => {
+        sidebar.classList.toggle("collapsed");
+    });
 }
 
 
