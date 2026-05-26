@@ -416,8 +416,13 @@ function loadTimeline() {
 // ===============================
 function toggleActivityForm() {
     const form = document.getElementById("activityForm");
-    form.style.display = form.style.display === "none" ? "block" : "none";
+    if (form.style.display === "none" || form.style.display === "") {
+        form.style.display = "block";
+    } else {
+        form.style.display = "none";
+    }
 }
+
 
 
 // ===============================
