@@ -162,7 +162,7 @@
             <div class="card p-4">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
                     <div style="font-size:13px; font-weight:600; color:var(--text-3); text-transform:uppercase; letter-spacing:.06em;">Activity Timeline</div>
-                    <button class="btn btn-sm btn-primary" onclick="toggleActivityForm()">+ Add Activity</button>
+                    <button class="btn btn-sm btn-primary" id="addActivityBtn">+ Add Activity</button>
                 </div>
 
                 <!-- Add Activity Form -->
@@ -180,8 +180,8 @@
                             style="padding:7px 10px; border-radius:8px; border:1px solid var(--border,#e5e7eb); font-size:13px; background:var(--bg,#fff); color:var(--text-1,#111);">
                         <input type="text" id="activityNotes" placeholder="Notes..."
                             style="flex:1; min-width:180px; padding:7px 10px; border-radius:8px; border:1px solid var(--border,#e5e7eb); font-size:13px; background:var(--bg,#fff); color:var(--text-1,#111);">
-                        <button class="btn btn-sm btn-success" onclick="saveActivity()">Save</button>
-                        <button class="btn btn-sm btn-secondary" onclick="toggleActivityForm()">Cancel</button>
+                        <button class="btn btn-sm btn-success" id="saveActivityBtn">Save</button>
+                        <button class="btn btn-sm btn-secondary" id="cancelActivityBtn">Cancel</button>
                     </div>
                 </div>
 

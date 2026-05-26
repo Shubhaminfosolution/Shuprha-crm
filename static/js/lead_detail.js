@@ -78,6 +78,8 @@ document.addEventListener("DOMContentLoaded", () => {
     attachStatusListener(); 
     loadLead(leadId);
     loadTimeline();
+    document.getElementById("addActivityBtn")
+        ?.addEventListener("click", toggleActivityForm);
 });
 
 
