@@ -47,6 +47,7 @@ function loadDashboard(days = 7) {
 
             // ✅ KPI
             document.getElementById("total_leads").innerText = data.total_leads || 0;
+            document.getElementById("kpi_badge_leads").innerText = data.today_leads + " today";
             document.getElementById("today_leads").innerText = data.today_leads || 0;
             document.getElementById("total_appointments").innerText = data.total_appointments || 0;
             document.getElementById("completed").innerText = data.completed || 0;

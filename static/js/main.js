@@ -20,7 +20,7 @@ function authFetch(url, options = {}) {
     if (window.location.pathname.includes("login")) return;
 
     if (!token) {
-        window.location.href = "/login/";
+        window.location.href = "/api/v1/login/";
     }
 
 })();
@@ -64,27 +64,28 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ☰ Sidebar Toggle
-    const sidebar = document.querySelector(".sidebar");
-    const main = document.querySelector(".main");
-    const sidebarBtn = document.getElementById("sidebarToggle");
+    document.addEventListener("DOMContentLoaded", function () {
+        const sidebar = document.querySelector(".sidebar");
+        const main = document.querySelector(".main");
+        const sidebarBtn = document.getElementById("sidebarToggle");
 
-    if (localStorage.getItem("sidebar") === "collapsed") {
-        sidebar?.classList.add("collapsed");
-        main?.classList.add("collapsed");
-    }
+        if (localStorage.getItem("sidebar") === "collapsed") {
+            sidebar?.classList.add("collapsed");
+            main?.classList.add("collapsed");
+        }
 
-    if (sidebarBtn) {
-        sidebarBtn.addEventListener("click", () => {
-            sidebar.classList.toggle("collapsed");
-            main.classList.toggle("collapsed");
+        if (sidebarBtn) {
+            sidebarBtn.addEventListener("click", () => {
+                sidebar.classList.toggle("collapsed");
+                main.classList.toggle("collapsed");
 
-            localStorage.setItem(
-                "sidebar",
-                sidebar.classList.contains("collapsed") ? "collapsed" : "expanded"
-            );
-        });
-    }
-
+                localStorage.setItem(
+                    "sidebar",
+                    sidebar.classList.contains("collapsed") ? "collapsed" : "expanded"
+                );
+            });
+        }
+    });
     // 🔍 GLOBAL SEARCH
     let searchTimeout = null;
 

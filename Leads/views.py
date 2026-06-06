@@ -188,7 +188,7 @@ def dashboard_data(request):
     total_leads = leads.count()
     today_leads = leads.filter(created_at__date=today).count()
     total_appointments = appointments.count()
-    completed = appointments.filter(status="completed").count()
+    completed = leads.filter(status="converted").count()
 
     conversion_rate = (completed / total_leads * 100) if total_leads else 0
     appointment_rate = (total_appointments / total_leads * 100) if total_leads else 0
