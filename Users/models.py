@@ -4,50 +4,52 @@ from django.utils import timezone
 from django.contrib.auth.base_user import BaseUserManager
 
 
-
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError("Email is Required")
-        
         email = self.normalize_email(email)
         extra_fields.setdefault('is_active', True)
-
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
-    
 
     def create_superuser(self, email, password=None, **extra_fields):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
-        extra_fields.setdefault("role","admin")  
-
+        extra_fields.setdefault("role", "admin")
         if extra_fields.get('is_staff') is not True:
-            raise ValueError("Superuser must have is_staff=Ture")
+            raise ValueError("Superuser must have is_staff=True")
         if extra_fields.get('is_superuser') is not True:
-            raise ValueError("Superuser must have is_superuser=Ture")
+            raise ValueError("Superuser must have is_superuser=True")
         return self.create_user(email, password, **extra_fields)
-    
-    
 
 
 class User(AbstractBaseUser, PermissionsMixin):
     Role_choices = (
         ("admin", "Admin"),
         ("manager", "Manager"),
-        ("sales", "sales"),
+        ("sales", "Sales"),
+        ("client", "Client"),
     )
 
-    email = models.EmailField(unique= True)
+    email = models.EmailField(unique=True)
     full_name = models.CharField(max_length=255)
     role = models.CharField(max_length=20, choices=Role_choices)
+
+    business = models.ForeignKey(
+        'Ads.Business',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='users'
+    )
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_deleted = models.BooleanField(default=False)
-    
+
     created_at = models.DateTimeField(default=timezone.now)
 
     objects = UserManager()
@@ -57,3 +59,11 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+    @property
+    def is_client(self):
+        return self.role == "client"
+
+    @property
+    def is_internal(self):
+        return self.role in ("admin", "manager", "sales")
