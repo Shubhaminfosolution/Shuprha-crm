@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}Invoices — Shuprha CRM{% endblock %}
+
+{% block content %}
+<div class="p-6">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-800">Invoices</h1>
+      <p class="text-sm text-gray-500 mt-1">Track billing and payment status</p>
+    </div>
+    <a href="{% url 'invoices:invoice_create' %}"
+       class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
+      + New Invoice
+    </a>
+  </div>
+
+  <!-- Status Filter -->
+  <div class="flex gap-2 mb-5">
+    <a href="{% url 'invoices:invoice_list' %}"
+       class="px-3 py-1.5 rounded-full text-xs font-medium border
+              {% if not status_filter %}bg-gray-800 text-white border-gray-800{% else %}text-gray-600 border-gray-300 hover:bg-gray-100{% endif %}">
+      All
+    </a>
+    {% for value, label in status_choices %}
+    <a href="?status={{ value }}"
+       class="px-3 py-1.5 rounded-full text-xs font-medium border
+              {% if status_filter == value %}bg-gray-800 text-white border-gray-800{% else %}text-gray-600 border-gray-300 hover:bg-gray-100{% endif %}">
+      {{ label }}
+    </a>
+    {% endfor %}
+  </div>
+
+  <!-- Table -->
+  <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    {% if invoices %}
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 border-b border-gray-200">
+        <tr>
+          <th class="text-left px-5 py-3 font-medium text-gray-600">Number</th>
+          <th class="text-left px-5 py-3 font-medium text-gray-600">Title</th>
+          <th class="text-left px-5 py-3 font-medium text-gray-600">Lead</th>
+          <th class="text-left px-5 py-3 font-medium text-gray-600">Status</th>
+          <th class="text-left px-5 py-3 font-medium text-gray-600">Due Date</th>
+          <th class="text-right px-5 py-3 font-medium text-gray-600">Total</th>
+          <th class="text-right px-5 py-3 font-medium text-gray-600">Balance Due</th>
+          <th class="text-right px-5 py-3 font-medium text-gray-600">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {% for invoice in invoices %}
+        <tr class="hover:bg-gray-50 transition">
+          <td class="px-5 py-3 font-mono text-xs text-gray-500">{{ invoice.invoice_number }}</td>
+          <td class="px-5 py-3 font-medium text-gray-800">
+            <a href="{% url 'invoices:invoice_detail' invoice.pk %}" class="hover:text-blue-600">
+              {{ invoice.title }}
+            </a>
+            {% if invoice.proposal %}
+            <span class="ml-2 text-xs text-gray-400">from {{ invoice.proposal.proposal_number }}</span>
+            {% endif %}
+          </td>
+          <td class="px-5 py-3 text-gray-600">{{ invoice.lead.first_name }} {{ invoice.lead.last_name }}</td>
+          <td class="px-5 py-3">
+            {% if invoice.payment_status == 'unpaid' %}
+              <span class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full">Unpaid</span>
+            {% elif invoice.payment_status == 'partially_paid' %}
+              <span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full">Partial</span>
+            {% elif invoice.payment_status == 'paid' %}
+              <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Paid</span>
+            {% endif %}
+          </td>
+          <td class="px-5 py-3 text-gray-600">{{ invoice.due_date }}</td>
+          <td class="px-5 py-3 text-right font-medium text-gray-800">₹{{ invoice.total|floatformat:0 }}</td>
+          <td class="px-5 py-3 text-right font-medium
+                     {% if invoice.balance_due > 0 %}text-red-600{% else %}text-green-600{% endif %}">
+            ₹{{ invoice.balance_due|floatformat:0 }}
+          </td>
+          <td class="px-5 py-3 text-right">
+            <div class="flex items-center justify-end gap-2">
+              <a href="{% url 'invoices:invoice_pdf' invoice.pk %}"
+                 class="text-xs text-gray-500 hover:text-gray-800 border border-gray-200 px-2 py-1 rounded">
+                PDF
+              </a>
+              <a href="{% url 'invoices:invoice_edit' invoice.pk %}"
+                 class="text-xs text-blue-600 hover:text-blue-800 border border-blue-200 px-2 py-1 rounded">
+                Edit
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="text-center py-16 text-gray-400">
+      <p class="text-lg mb-2">No invoices yet</p>
+      <a href="{% url 'invoices:invoice_create' %}" class="text-blue-600 hover:underline text-sm">
+        Create your first invoice
+      </a>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

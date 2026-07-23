@@ -17,7 +17,7 @@ class LeadIngestionService:
         return data
 
     @staticmethod
-    def create_lead_from_form(form_id, lead_data, platform):
+    def create_lead_from_form(form_id, lead_data, platform, meta_lead_id=None):
 
         form = AdForm.objects.filter(form_id=form_id).first()
         if not form:
@@ -48,12 +48,17 @@ class LeadIngestionService:
         )
         email = parsed.get("email", "")
 
+        # Deduplication safeguard at this layer too
+        if meta_lead_id and Lead.objects.filter(meta_lead_id=meta_lead_id).exists():
+            logger.info(f"Lead with meta_lead_id={meta_lead_id} already exists, skipping.")
+            return None
+
         lead = Lead.objects.create(
             first_name=first_name,
             last_name=last_name,
             email=email,
             phone=phone,
-            source="meta ads",      # ← matches your Lead model choices
+            source="meta ads",
             source_platform=platform,
             business=business,
             ad_form=form,
@@ -65,10 +70,3 @@ class LeadIngestionService:
         )
 
         return lead
-
-
-
-
-
-
-

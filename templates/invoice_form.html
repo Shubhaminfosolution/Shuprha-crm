@@ -1,0 +1,292 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }} — Shuprha CRM{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-5xl mx-auto">
+
+  <!-- Header -->
+  <div class="flex items-center gap-3 mb-6">
+    <a href="{% url 'invoices:invoice_list' %}" class="text-gray-400 hover:text-gray-600 text-sm">← Invoices</a>
+    <span class="text-gray-300">/</span>
+    <h1 class="text-xl font-bold text-gray-800">{{ page_title }}</h1>
+  </div>
+
+  {% if is_convert and proposal %}
+  <div class="mb-5 bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-sm text-blue-700">
+    Converting from <strong>{{ proposal.proposal_number }}</strong> — {{ proposal.title }}.
+    All line items have been pre-filled. Review and adjust before saving.
+  </div>
+  {% endif %}
+
+  <form method="post" id="invoice-form">
+    {% csrf_token %}
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- LEFT: Main form -->
+      <div class="lg:col-span-2 space-y-5">
+
+        <!-- Basic Info -->
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+          <h2 class="text-sm font-semibold text-gray-700 mb-4">Invoice Details</h2>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="col-span-2">
+              <label class="block text-xs font-medium text-gray-600 mb-1">Lead *</label>
+              {{ form.lead }}
+              {% if form.lead.errors %}
+              <p class="text-red-500 text-xs mt-1">{{ form.lead.errors.0 }}</p>
+              {% endif %}
+            </div>
+
+            <div class="col-span-2">
+              <label class="block text-xs font-medium text-gray-600 mb-1">Title *</label>
+              {{ form.title }}
+              {% if form.title.errors %}
+              <p class="text-red-500 text-xs mt-1">{{ form.title.errors.0 }}</p>
+              {% endif %}
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Payment Status</label>
+              {{ form.payment_status }}
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Amount Paid (₹)</label>
+              {{ form.amount_paid }}
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Issue Date *</label>
+              {{ form.issue_date }}
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Due Date *</label>
+              {{ form.due_date }}
+              {% if form.due_date.errors %}
+              <p class="text-red-500 text-xs mt-1">{{ form.due_date.errors.0 }}</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Line Items -->
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-sm font-semibold text-gray-700">Services / Line Items</h2>
+            <button type="button" onclick="addLineItem()"
+                    class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition">
+              + Add Row
+            </button>
+          </div>
+
+          {{ formset.management_form }}
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm" id="lineitems-table">
+              <thead>
+                <tr class="border-b border-gray-100">
+                  <th class="text-left pb-2 text-xs font-medium text-gray-500 w-48">Service Preset</th>
+                  <th class="text-left pb-2 text-xs font-medium text-gray-500">Description</th>
+                  <th class="text-left pb-2 text-xs font-medium text-gray-500 w-20">Qty</th>
+                  <th class="text-left pb-2 text-xs font-medium text-gray-500 w-28">Rate (₹)</th>
+                  <th class="text-right pb-2 text-xs font-medium text-gray-500 w-28">Amount (₹)</th>
+                  <th class="w-8"></th>
+                </tr>
+              </thead>
+              <tbody id="lineitem-rows">
+                {% for item_form in formset %}
+                <tr class="lineitem-row border-b border-gray-50 py-2" data-index="{{ forloop.counter0 }}">
+                  {% for hidden in item_form.hidden_fields %}{{ hidden }}{% endfor %}
+                  <td class="py-2 pr-2">{{ item_form.service_preset }}</td>
+                  <td class="py-2 pr-2">{{ item_form.description }}</td>
+                  <td class="py-2 pr-2">{{ item_form.quantity }}</td>
+                  <td class="py-2 pr-2">{{ item_form.unit_price }}</td>
+                  <td class="py-2 text-right font-medium text-gray-800">
+                    <span class="row-amount">₹0</span>
+                  </td>
+                  <td class="py-2 pl-2">
+                    {% if item_form.instance.pk %}
+                    <input type="checkbox" name="{{ item_form.prefix }}-DELETE"
+                           id="{{ item_form.prefix }}-DELETE"
+                           class="delete-checkbox hidden">
+                    {% endif %}
+                    <button type="button" onclick="removeRow(this)"
+                            class="text-red-400 hover:text-red-600 text-lg leading-none">×</button>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+          <label class="block text-xs font-medium text-gray-600 mb-1">Notes / Payment Instructions</label>
+          {{ form.notes }}
+        </div>
+
+      </div>
+
+      <!-- RIGHT: Summary -->
+      <div class="space-y-5">
+        <div class="bg-white rounded-xl border border-gray-200 p-5 sticky top-6">
+          <h2 class="text-sm font-semibold text-gray-700 mb-4">Summary</h2>
+
+          <div class="space-y-3">
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-500">Subtotal</span>
+              <span class="font-medium text-gray-800" id="summary-subtotal">₹0</span>
+            </div>
+            <div class="flex justify-between items-center text-sm gap-4">
+              <label class="text-gray-500 whitespace-nowrap">Discount (₹)</label>
+              {{ form.discount }}
+            </div>
+            <div class="border-t border-gray-100 pt-3 flex justify-between text-base font-bold">
+              <span class="text-gray-800">Total</span>
+              <span id="summary-total">₹0</span>
+            </div>
+            <div class="flex justify-between text-sm text-green-600">
+              <span>Amount Paid</span>
+              <span id="summary-paid">₹0</span>
+            </div>
+            <div class="flex justify-between text-sm font-semibold text-red-600">
+              <span>Balance Due</span>
+              <span id="summary-balance">₹0</span>
+            </div>
+          </div>
+
+          <button type="submit"
+                  class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm py-2.5 rounded-lg transition">
+            {{ form_action }}
+          </button>
+
+          <a href="{% url 'invoices:invoice_list' %}"
+             class="block text-center mt-3 text-sm text-gray-400 hover:text-gray-600">
+            Cancel
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </form>
+</div>
+
+<script>
+const PRESETS = {{ presets_json|safe }};
+const PRESET_MAP = {};
+PRESETS.forEach(p => PRESET_MAP[p.id] = p);
+
+let formCount = {{ formset.total_form_count }};
+
+function fillFromPreset(select) {
+  const row = select.closest('tr');
+  const preset = PRESET_MAP[parseInt(select.value)];
+  if (!preset) return;
+  row.querySelector('.line-description').value = preset.name;
+  row.querySelector('.line-price').value        = preset.default_rate;
+  recalcRow(row.querySelector('.line-qty'));
+}
+
+function recalcRow(input) {
+  const row   = input.closest('tr');
+  const qty   = parseFloat(row.querySelector('.line-qty').value)   || 0;
+  const price = parseFloat(row.querySelector('.line-price').value) || 0;
+  row.querySelector('.row-amount').textContent = '₹' + (qty * price).toLocaleString('en-IN', {maximumFractionDigits: 0});
+  updateSummary();
+}
+
+function updateSummary() {
+  let subtotal = 0;
+  document.querySelectorAll('.lineitem-row:not(.deleted)').forEach(row => {
+    const qty   = parseFloat(row.querySelector('.line-qty')?.value)   || 0;
+    const price = parseFloat(row.querySelector('.line-price')?.value) || 0;
+    subtotal += qty * price;
+  });
+
+  const discount = parseFloat(document.querySelector('[name$="-discount"]')?.value)    || 0;
+  const paid     = parseFloat(document.querySelector('[name$="-amount_paid"]')?.value) || 0;
+  const total    = subtotal - discount;
+  const balance  = total - paid;
+
+  document.getElementById('summary-subtotal').textContent = '₹' + subtotal.toLocaleString('en-IN', {maximumFractionDigits: 0});
+  document.getElementById('summary-total').textContent    = '₹' + total.toLocaleString('en-IN',    {maximumFractionDigits: 0});
+  document.getElementById('summary-paid').textContent     = '₹' + paid.toLocaleString('en-IN',     {maximumFractionDigits: 0});
+  document.getElementById('summary-balance').textContent  = '₹' + balance.toLocaleString('en-IN',  {maximumFractionDigits: 0});
+}
+
+function addLineItem() {
+  const totalForms = document.querySelector('[name="form-TOTAL_FORMS"]');
+  const idx    = formCount;
+  const tbody  = document.getElementById('lineitem-rows');
+  const newRow = document.createElement('tr');
+  newRow.className     = 'lineitem-row border-b border-gray-50 py-2';
+  newRow.dataset.index = idx;
+
+  const selectOptions = PRESETS.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+
+  newRow.innerHTML = `
+    <input type="hidden" name="form-${idx}-id" value="">
+    <input type="hidden" name="form-${idx}-order" value="${idx}">
+    <td class="py-2 pr-2">
+      <select name="form-${idx}-service_preset" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white service-preset-select" onchange="fillFromPreset(this)">
+        <option value="">— Select service —</option>
+        ${selectOptions}
+      </select>
+    </td>
+    <td class="py-2 pr-2">
+      <input type="text" name="form-${idx}-description" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm line-description" placeholder="Service description">
+    </td>
+    <td class="py-2 pr-2">
+      <input type="number" name="form-${idx}-quantity" value="1" min="0.01" step="0.01"
+             class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm line-qty" oninput="recalcRow(this)">
+    </td>
+    <td class="py-2 pr-2">
+      <input type="number" name="form-${idx}-unit_price" value="" min="0"
+             class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm line-price" oninput="recalcRow(this)">
+    </td>
+    <td class="py-2 text-right font-medium text-gray-800"><span class="row-amount">₹0</span></td>
+    <td class="py-2 pl-2">
+      <button type="button" onclick="removeRow(this)" class="text-red-400 hover:text-red-600 text-lg leading-none">×</button>
+    </td>
+  `;
+
+  tbody.appendChild(newRow);
+  formCount++;
+  totalForms.value = formCount;
+  updateSummary();
+}
+
+function removeRow(btn) {
+  const row    = btn.closest('tr');
+  const delChk = row.querySelector('.delete-checkbox');
+  if (delChk) {
+    delChk.checked = true;
+    row.classList.add('deleted');
+    row.style.display = 'none';
+  } else {
+    row.remove();
+    formCount--;
+    document.querySelector('[name="form-TOTAL_FORMS"]').value = formCount;
+  }
+  updateSummary();
+}
+
+document.querySelector('[name$="-discount"]')?.addEventListener('input',     updateSummary);
+document.querySelector('[name$="-amount_paid"]')?.addEventListener('input',  updateSummary);
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.lineitem-row').forEach(row => {
+    const qty   = parseFloat(row.querySelector('.line-qty')?.value)   || 0;
+    const price = parseFloat(row.querySelector('.line-price')?.value) || 0;
+    const el    = row.querySelector('.row-amount');
+    if (el) el.textContent = '₹' + (qty * price).toLocaleString('en-IN', {maximumFractionDigits: 0});
+  });
+  updateSummary();
+});
+</script>
+{% endblock %}

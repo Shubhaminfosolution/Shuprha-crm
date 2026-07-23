@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}Proposals — Shuprha CRM{% endblock %}
+
+{% block content %}
+<div class="p-6">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-800">Proposals</h1>
+      <p class="text-sm text-gray-500 mt-1">Manage and track all client proposals</p>
+    </div>
+    <a href="{% url 'invoices:proposal_create' %}"
+       class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
+      + New Proposal
+    </a>
+  </div>
+
+  <!-- Status Filter -->
+  <div class="flex gap-2 mb-5">
+    <a href="{% url 'invoices:proposal_list' %}"
+       class="px-3 py-1.5 rounded-full text-xs font-medium border
+              {% if not status_filter %}bg-gray-800 text-white border-gray-800{% else %}text-gray-600 border-gray-300 hover:bg-gray-100{% endif %}">
+      All
+    </a>
+    {% for value, label in status_choices %}
+    <a href="?status={{ value }}"
+       class="px-3 py-1.5 rounded-full text-xs font-medium border
+              {% if status_filter == value %}bg-gray-800 text-white border-gray-800{% else %}text-gray-600 border-gray-300 hover:bg-gray-100{% endif %}">
+      {{ label }}
+    </a>
+    {% endfor %}
+  </div>
+
+  <!-- Table -->
+  <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    {% if proposals %}
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 border-b border-gray-200">
+        <tr>
+          <th class="text-left px-5 py-3 font-medium text-gray-600">Number</th>
+          <th class="text-left px-5 py-3 font-medium text-gray-600">Title</th>
+          <th class="text-left px-5 py-3 font-medium text-gray-600">Lead</th>
+          <th class="text-left px-5 py-3 font-medium text-gray-600">Status</th>
+          <th class="text-left px-5 py-3 font-medium text-gray-600">Valid Until</th>
+          <th class="text-right px-5 py-3 font-medium text-gray-600">Total</th>
+          <th class="text-right px-5 py-3 font-medium text-gray-600">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {% for proposal in proposals %}
+        <tr class="hover:bg-gray-50 transition">
+          <td class="px-5 py-3 font-mono text-xs text-gray-500">{{ proposal.proposal_number }}</td>
+          <td class="px-5 py-3 font-medium text-gray-800">
+            <a href="{% url 'invoices:proposal_detail' proposal.pk %}" class="hover:text-blue-600">
+              {{ proposal.title }}
+            </a>
+            {% if proposal.converted_to_invoice %}
+            <span class="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Invoiced</span>
+            {% endif %}
+          </td>
+          <td class="px-5 py-3 text-gray-600">{{ proposal.lead.first_name }} {{ proposal.lead.last_name }}</td>
+          <td class="px-5 py-3">
+            {% if proposal.status == 'draft' %}
+              <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">Draft</span>
+            {% elif proposal.status == 'sent' %}
+              <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">Sent</span>
+            {% elif proposal.status == 'accepted' %}
+              <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Accepted</span>
+            {% elif proposal.status == 'rejected' %}
+              <span class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full">Rejected</span>
+            {% endif %}
+          </td>
+          <td class="px-5 py-3 text-gray-600">{{ proposal.valid_until }}</td>
+          <td class="px-5 py-3 text-right font-medium text-gray-800">₹{{ proposal.total|floatformat:0 }}</td>
+          <td class="px-5 py-3 text-right">
+            <div class="flex items-center justify-end gap-2">
+              <a href="{% url 'invoices:proposal_pdf' proposal.pk %}"
+                 class="text-xs text-gray-500 hover:text-gray-800 border border-gray-200 px-2 py-1 rounded">
+                PDF
+              </a>
+              {% if not proposal.converted_to_invoice %}
+              <a href="{% url 'invoices:proposal_convert' proposal.pk %}"
+                 class="text-xs text-green-600 hover:text-green-800 border border-green-200 px-2 py-1 rounded">
+                → Invoice
+              </a>
+              {% endif %}
+              <a href="{% url 'invoices:proposal_edit' proposal.pk %}"
+                 class="text-xs text-blue-600 hover:text-blue-800 border border-blue-200 px-2 py-1 rounded">
+                Edit
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="text-center py-16 text-gray-400">
+      <p class="text-lg mb-2">No proposals yet</p>
+      <a href="{% url 'invoices:proposal_create' %}" class="text-blue-600 hover:underline text-sm">
+        Create your first proposal
+      </a>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}
