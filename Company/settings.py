@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'encrypted_model_fields',
     'django_celery_beat',
     'Clients',
+    'Billings',
 ]
 
 MIDDLEWARE = [
@@ -237,6 +238,18 @@ CELERY_BEAT_SCHEDULE = {
     "mark-overdue-tasks": {
         "task": "Tasks.tasks.mark_overdue_tasks",
         "schedule": crontab(minute="*/30"),  # every 30 minutes
+    },
+    "daily-report": {
+        "task": "Billing.tasks.send_daily_report",
+        "schedule": crontab(hour=8, minute=0),  # 8 AM daily
+    },
+    "weekly-report": {
+        "task": "Billing.tasks.send_weekly_report",
+        "schedule": crontab(hour=8, minute=0, day_of_week=1),  # Monday 8 AM
+    },
+    "mark-overdue-tasks": {
+        "task": "Tasks.tasks.mark_overdue_tasks",
+        "schedule": crontab(minute="*/30"),
     },
 }
  

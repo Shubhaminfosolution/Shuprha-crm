@@ -36,6 +36,7 @@ urlpatterns = [
     path("api/v1/", include("Ads.urls")),
     path("api/v1/", include("Tasks.urls")),
     path('invoices/', include('Invoices.urls', namespace='invoices')),
-    path("", homepage, name="home")
+    path("", include("Billings.urls")),
+    path("", homepage, name="home"),
     
 ]

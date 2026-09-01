@@ -31,7 +31,7 @@ function loadDashboard(days = 7) {
                 localStorage.removeItem("token");
                 sessionStorage.removeItem("token");
 
-                window.location.href = "api/v1/login/";
+                window.location.href = "/api/v1/login/";
                 return;
             }
 
