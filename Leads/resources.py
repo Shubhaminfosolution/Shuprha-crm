@@ -13,7 +13,7 @@ class LeadResource(resources.ModelResource):
 
     class Meta:
         model = Lead
-        import_id_fields = ("email",)
+        import_id_fields = ("phone",)
         skip_unchanged = True
         report_skipped = True
         fields = (
