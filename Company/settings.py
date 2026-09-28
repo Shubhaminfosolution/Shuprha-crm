@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'django_celery_beat',
     'Clients',
     'Billings',
+    'Blog',
 ]
 
 MIDDLEWARE = [
@@ -104,7 +105,7 @@ if DATABASE_URL:
         "default": dj_database_url.parse(
             DATABASE_URL,
             conn_max_age=600,
-            ssl_require=True
+            ssl_require="localhost" not in DATABASE_URL and "127.0.0.1" not in DATABASE_URL
         )
     }
 else:
