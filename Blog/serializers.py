@@ -61,8 +61,11 @@ class PostSummarySerializer(serializers.ModelSerializer):
     def get_author(self, obj):
         user = obj.author
         if not user:
-            return {"name": ""}
-        return {"name": user.get_full_name() or user.get_username()}
+            return {"name": "Shuprha Team"}
+        name = getattr(user, "full_name", "")
+        if callable(name):  # in case full_name is a method, not a field
+            name = name()
+        return {"name": name or "Shuprha Team"}
 
     def get_reading_time_minutes(self, obj):
         words = len(strip_tags(obj.content or "").split())
