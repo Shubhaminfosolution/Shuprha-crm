@@ -24,6 +24,7 @@ class Lead(models.Model):
         ("manual", "Manual"),
         ("website", "Website"),
         ("referral", "Referral"),
+        ("cold leads", "Cold Leads")
     ]
 
     # Core fields
