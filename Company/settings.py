@@ -190,12 +190,14 @@ REST_FRAMEWORK = {
 }
 
 
-
 CORS_ALLOWED_ORIGINS = [
     "https://shuprha-web.vercel.app",
-    "https://crm.shuprha.com"
+    "https://crm.shuprha.com",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://shuprha.com",
+    "https://www.shuprha.com",
 ]
-
 
 AUTHENTICATION_BACKENDS = [
     'Users.backends.EmailBackend'
