@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'Clients',
     'Billings',
     'Blog',
+    "storages",
 ]
 
 MIDDLEWARE = [
@@ -170,7 +171,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
 
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
 
 # Security for production
 CSRF_TRUSTED_ORIGINS = [
@@ -256,3 +257,19 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
  
+
+
+AWS_STORAGE_BUCKET_NAME = "shuprha-media-blog"
+AWS_S3_REGION_NAME = "ap-south-1"
+AWS_QUERYSTRING_AUTH = False
+AWS_DEFAULT_ACL = None
+
+
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
